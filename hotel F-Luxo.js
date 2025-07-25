@@ -15,17 +15,23 @@ class Cliente extends Usuário {
 }
 //-------------fim(1)-------------
 
-class Quartos{
-    constructor(camas,preço,quantidade){
+class Quartos {
+    constructor(camas, preço, quantidade) {
         this.camas = camas;
         this.preço = preço;
         this.quantidade = quantidade;
     }
 }
+//Ideia de gestão de dados 1 --> O ID único de cada cliente vai ser o índice da matriz
+//matriz clientes: [[nome,data de nascimento,cpf,email,senha],
+// [gabriel,23/07/03,11122233344, gabriel@gmail.com,chicletecombanana]]
+// iteração simples atrávez da matriz para achar os dados
 
 class Sistema {
     constructor(clientes, Quartos) {
-        
+        this.clientes = [];
+        this.quartos = [];
+
     }
 }
 

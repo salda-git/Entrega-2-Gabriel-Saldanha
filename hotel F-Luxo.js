@@ -1,4 +1,4 @@
-//1- primeiro definir as características do login
+// 1- primeiro definir as características do login
 class Usuário {
     constructor(id, cpf, email, senha) {
         this.id = id;
@@ -11,6 +11,14 @@ class Usuário {
 class Cliente extends Usuário {
     constructor(id, cpf, email, senha) {
         super(id, cpf, email, senha);
+        this.nome = nome;
+    }
+}
+
+class Funcionario extends Usuário {
+    constructor(id, cpf, email, senha, nome_de_usuario) {
+        super(id, cpf, email, senha);
+        this.nome_de_usuario = nome_de_usuario;
     }
 }
 //-------------fim(1)-------------
@@ -22,21 +30,45 @@ class Quartos {
         this.quantidade = quantidade;
     }
 }
-//Ideia de gestão de dados 1 --> O ID único de cada cliente vai ser o índice da matriz
-//matriz clientes: [[nome,data de nascimento,cpf,email,senha],
-// [gabriel,23/07/03,11122233344, gabriel@gmail.com,chicletecombanana]]
-// iteração simples atrávez da matriz para achar os dados
 
 class Sistema {
     constructor(clientes, Quartos) {
         this.clientes = [];
-        this.quartos = [];
-
+        this.Funcionarios = [];
+        this.proximoID = 1;
     }
+
+    cadastrarCliente(nome, email, senha) {
+        const novoCLiente = new Cliente(this.proximoID, nome, email, senha);
+        this.clientes.push(novoCLiente);
+        this.proximoID += 1;
+        return novoCLiente;
+    }
+    
+    fazerLogin(email, senha) {
+        //achar o cliente usando for
+        let buscarCLiente = null;
+        for (const cliente of this.clientes) {
+            if (cliente.email == email && i.senha == senha) {
+                buscarCLiente = cliente;
+                break;
+            }
+        }
+        //identificar se há ou não cadastro
+        if (buscarCLiente) {
+            console.log("Login bem sucedido");
+            return buscarCLiente;
+        } else {
+            console.log("Cliente não encontrado");
+            return null
+        }
+    }
+
 }
 
 
 //definir o que irá aparecer para o usuário
-console.log("-".repeat(10) + " escolha uma opção " + "-".repeat(10));
+console.log("=".repeat(10) + " escolha uma opção " + "=".repeat(10));
 console.log("1: Fazer login");
 console.log("2: Cadastre-se");
+console.log("3: Sair do programa");

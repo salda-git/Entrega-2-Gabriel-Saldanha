@@ -34,15 +34,16 @@ class Quartos {
 
 //definindo a funcionalidades
 class Sistema {
-    constructor(clientes, Quartos) {
-        this.clientes = [];
-        this.Funcionarios = [];
+    constructor(usuario, quartos, funcionarios) {
+        this.usuarios = [];
+        this.quartos = [];
+        this.funcionarios = [];
         this.proximoID = 1;
     }
 
-    cadastrarCliente(nome, email, senha) {
+    cadastrarUsuario(nome, email, senha) {
         const novoCLiente = new Cliente(this.proximoID, nome, email, senha);
-        this.clientes.push(novoCLiente);
+        this.usuarios.push(novoCLiente);
         this.proximoID += 1;
         console.log("Cadastro realizado com sucesso!")
         return novoCLiente;
@@ -50,8 +51,8 @@ class Sistema {
 
     fazerLogin(email, senha) {
         //achar o usuario usando for
-        let buscarCLiente = null;
-        for (const usuario of this.usuario) {
+        let buscarUsuario = null;
+        for (const usuario of this.usuarios) {
             if (usuario.email == email && usuario.senha == senha) {
                 buscarUsuario = usuario;
                 break;
@@ -59,11 +60,11 @@ class Sistema {
             }
         }
         //identificar se há ou não cadastro
-        if (buscarCLiente) {
-            console.log("Login bem sucedido");
-            return c;
+        if (buscarUsuario) {
+            console.log("Login bem sucedido!");
+            return buscarUsuario;
         } else {
-            console.log("Cliente não encontrado");
+            console.log("Cliente não encontrado.");
             return null
         }
     }
@@ -73,8 +74,8 @@ class Sistema {
 const sistema = new Sistema;
 
 //definir o que irá aparecer para o usuário
-let sair = false;
-while (!sair) {
+let sairDoPrograma = false;
+while (!sairDoPrograma) {
 
 
     console.log("=".repeat(10) + " escolha uma opção " + "=".repeat(10));
@@ -88,7 +89,39 @@ while (!sair) {
             console.log("=".repeat(40));
             email = requisicao.question("Email: ");
             senha = requisicao.question("Senha: ");
-            sistema.fazerLogin(email, senha);
+            const usuarioLogado = sistema.fazerLogin(email, senha);
+
+            //entrando na aba de login do usuario
+
+            if (usuarioLogado) {
+                console.log(`Bem vindo, ${usuarioLogado.nome}!`);
+                let sairDaAreaDoCliente = false
+
+                while (!sairDaAreaDoCliente) {
+                    console.log("=".repeat(12) + "Área do Cliente" + "=".repeat(12));
+                    console.log("1: Ver Meus Dados");
+                    console.log("2: Ver Lista de Quartos");
+                    console.log("3: Fazer reserva")
+                    console.log("4: Cancelar reserva");
+                    console.log("5: Ver minhas reservas");
+                    console.log("6: Voltar ao Menu Pricipal");
+                    const numeroÁreaCLiente = requisicao.question("Opcao escolhida: ")
+
+                    switch (numeroÁreaCLiente) {
+                        case "1":
+                            console.log(`${usuarioLogado.nome}`);
+                            console.log(`${usuarioLogado.email}`);
+                            console.log(`${usuarioLogado.cpf}`);
+
+                        case "6":
+                            sairDaAreaDoCliente = true
+                            break;
+
+                    }
+
+                }
+            }
+
             break;
 
         case "2":
@@ -96,12 +129,11 @@ while (!sair) {
             nome = requisicao.question("Nome: ")
             email = requisicao.question("Email: ");
             senha = requisicao.question("Senha: ");
-            sistema.cadastrarUsuario(nome, email, senha, );
+            sistema.cadastrarUsuario(nome, email, senha,);
             break;
 
         case "3":
-            sair = true;
+            sairDoPrograma = true;
             break;
     }
-
 }

@@ -125,6 +125,14 @@ class Sistema {
         }
     }
 
+    listarClientes() {
+        let x = 1
+        for (const cliente of this.clientes) {
+            console.log(`${x}: ${cliente.id_cliente} | ${x}: ${cliente.nome} | ${x}: ${cliente.email} | `)
+            x += 1;
+        }
+    }
+
     adicionarQuarto(tipoDeQuarto, camas, diaria, quantidade) {
         const novoQuarto = new Quartos(tipoDeQuarto, camas, diaria, quantidade);
         this.quartos.push(novoQuarto);
@@ -369,6 +377,7 @@ while (!sairDoPrograma) {
                                 console.log("\n" + "=".repeat(40));
                                 console.log(`${usuarioLogado.nome}`);
                                 console.log(`${usuarioLogado.email}`);
+                                requisicao.question("Pressione ENTER para continuar: ")
                                 break;
 
                             //listar os quartos disponiveis, com a opção de clicar para ver os seus detalhes
@@ -412,8 +421,22 @@ while (!sairDoPrograma) {
 
                         switch (numeroÁreaFuncioario) {
 
+                            case "1":
+                                console.log("\n" + "=".repeat(40));
+                                console.log(`${usuarioLogado.nome}`);
+                                console.log(`${usuarioLogado.email}`);
+                                requisicao.question("Pressione ENTER para continuar: ")
+                                break;
+
                             case "2":
                                 sistema.listarReservas();
+                                break;
+
+                            case "3":
+                                sistema.listarQuartosDetalhes();
+                                break;
+                            case "4":
+                                sistema.listarClientes();
                                 break;
 
                             case "7":

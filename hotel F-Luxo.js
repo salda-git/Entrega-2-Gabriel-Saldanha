@@ -226,6 +226,31 @@ class Sistema {
 
     }
 
+    listarReservasCliente(usuarioLogado) {
+        //filtrar as reservas desse cliente
+        const reservasDoCliente = [];
+        for (const reserva of this.reservas) {
+            if (reserva.id_cliente === usuarioLogado.id_cliente) {
+                reservasDoCliente.push(reserva)
+            }
+
+        }
+
+        if (reservasDoCliente.length === 0) {
+            console.log("Nenhuma reserva encontrada")
+            return
+        }
+
+        let x = 1;
+        for (const reserva of reservasDoCliente) {
+            console.log(`${x}: Quarto: ${reserva.tipoDeQuarto} | ` +
+                `Check-in: ${reserva.checkin} | ` +
+                `Checkout: ${reserva.checkout} | ` +
+                `Status: ${reserva.status}`)
+            x += 1
+        }
+    }
+
     cancelarReserva(usuarioLogado) {
         //filtrar as reservas desse cliente
         const reservasDoCliente = [];
@@ -358,6 +383,9 @@ while (!sairDoPrograma) {
                             case "4":
                                 sistema.cancelarReserva(usuarioLogado);
                                 break;
+
+                            case "5":
+                                sistema.listarReservasCliente(usuarioLogado);
 
                             case "6":
                                 sairDaAreaDoCliente = true

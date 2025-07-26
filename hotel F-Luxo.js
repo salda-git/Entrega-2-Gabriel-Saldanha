@@ -36,7 +36,7 @@ class Quartos {
 class Reserva {
     constructor(id_reserva, id_cliente, tipoDeQuarto, checkin, checkout, status) {
         this.id_cliente = id_cliente;
-        this.tipoDeQuarto = tipoDeQuarto
+        this.tipoDeQuarto = tipoDeQuarto;
         this.status = status;
         this.id_reserva = id_reserva;
         this.checkin = checkin;
@@ -125,14 +125,14 @@ class Sistema {
         }
     }
 
-    adicionarQuarto(nome, camas, diaria, quantidade) {
-        const novoQuarto = new Quartos(nome, camas, diaria, quantidade);
+    adicionarQuarto(tipoDeQuarto, camas, diaria, quantidade) {
+        const novoQuarto = new Quartos(tipoDeQuarto, camas, diaria, quantidade);
         this.quartos.push(novoQuarto);
-        console.log(`${novoQuarto.nome} adicionado com sucesso!`)
+        console.log(`${novoQuarto.tipoDeQuarto} adicionado com sucesso!`)
         return novoQuarto;
     }
 
-    listarQuartos() {
+    listarQuartosDetalhes() {
         let x = 1
         for (const quarto of sistema.quartos) {
             console.log(`${x}: ${quarto.tipoDeQuarto}`)
@@ -140,7 +140,7 @@ class Sistema {
         }
         let voltar = x
         console.log(`${voltar}: voltar para Àrea do Cliente`);
-        numeroListaQuartos = requisicao.question("Digite o numero do quarto para ver os detalhes ou para voltar:")
+        const numeroListaQuartos = requisicao.question("Digite o numero do quarto para ver os detalhes ou para voltar:")
         const valor = parseInt(numeroListaQuartos);
 
         if (valor == voltar) {
@@ -159,11 +159,12 @@ class Sistema {
             console.log('Opção inválida')
         }
     }
-    fazerReserva(tipoDeQuartoReserva, id_cliente, checkin, checkout) {
+
+    fazerReserva(tipoDeQuarto, id_cliente, checkin, checkout) {
         //encontrar o quarto
         let quartoEncontrado = null
         for (const i of this.quartos) {
-            if (i.tipoDeQuarto === tipoDeQuartoReserva) {
+            if (i.tipoDeQuarto === tipoDeQuarto) {
                 quartoEncontrado = i;
                 break;
             }
@@ -171,7 +172,7 @@ class Sistema {
 
         //verificar se há disponibilidade e fazer reserva
         if (quartoEncontrado && quartoEncontrado.quantidade > 0) {
-            const novaReserva = new Reserva(this.proximoID_reserva, id_cliente, tipoDeQuarto, checkin, checkout)
+            const novaReserva = new Reserva(this.proximoID_reserva, id_cliente, tipoDeQuarto, checkin, checkout, 'pendente')
 
 
             this.reservas.push(novaReserva);
@@ -183,6 +184,36 @@ class Sistema {
         } else {
             console.log(`Não há ${tipoDeQuarto} disponíveis`);
             return null;
+        }
+    }
+
+    listarQuartosReserva(usuarioLogado) {
+        let x = 1
+        for (const quarto of sistema.quartos) {
+            console.log(`${x}: ${quarto.tipoDeQuarto}`)
+            x += 1;
+        }
+        let voltar = x
+        console.log(`${voltar}: voltar para Àrea do Cliente`);
+        const numeroListaQuartos = requisicao.question("Qual quarto deseja reservar?: ")
+        const valor = parseInt(numeroListaQuartos);
+
+        if (valor == voltar) {
+            return
+        }
+
+        if (valor > 0 && valor < voltar) {
+            const indiceQuarto = valor - 1;
+            const quartoSelecionado = this.quartos[indiceQuarto];
+
+            console.log(`Qual a data de entrada e saída?`);
+            console.log("Use o padrão XX/XX/XXXX")
+            const checkin = requisicao.question("Checkin: ")
+            const checkout = requisicao.question("Checkout: ")
+            this.fazerReserva(quartoSelecionado.tipoDeQuarto, usuarioLogado.id_cliente, checkin, checkout)
+
+        } else {
+            console.log('Opção inválida')
         }
     }
 }
@@ -240,11 +271,12 @@ while (!sairDoPrograma) {
 
                             //listar os quartos disponiveis, com a opção de clicar para ver os seus detalhes
                             case "2":
-                                sistema.listarQuartos();
-                                break
+                                sistema.listarQuartosDetalhes();
+                                break;
 
                             case "3":
-                                break
+                                sistema.listarQuartosReserva(usuarioLogado);
+                                break;
 
                             case "6":
                                 sairDaAreaDoCliente = true
@@ -266,10 +298,11 @@ while (!sairDoPrograma) {
                         console.log("4: Ver Lista de Clientes");
                         console.log("5: Mudar Status da Reserva");
                         console.log("6: Adicionar Quarto");
+                        console.log("7: Sair da Área do funcionário")
                         const numeroÁreaFuncioario = requisicao.question("Opcao escolhida: ");
 
                         switch (numeroÁreaFuncioario) {
-                            case "6":
+                            case "7":
                                 sairDaAreaDoFuncionário = true;
                                 break;
                         }

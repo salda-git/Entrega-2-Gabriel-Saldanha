@@ -219,12 +219,79 @@ class Sistema {
 
     listarReservas() {
         let x = 1
-        for (const reserva of sistema.reservas) {
+        for (const reserva of this.reservas) {
             console.log(`${x}: ${reserva.id_reserva} | ${reserva.id_cliente} | ${reserva.tipoDeQuarto} | ${reserva.checkin}| ${reserva.checkout}| ${reserva.status}`)
             x += 1;
         }
 
     }
+
+    cancelarReserva(usuarioLogado) {
+        //filtrar as reservas desse cliente
+        const reservasDoCliente = [];
+        for (const reserva of this.reservas) {
+            if (reserva.id_cliente === usuarioLogado.id_cliente) {
+                reservasDoCliente.push(reserva)
+            }
+
+        }
+
+        if (reservasDoCliente.length === 0) {
+            console.log("Nenhume reserva encontrada")
+            return
+        }
+
+        //listar as reservas da lista filtrada
+        let x = 1;
+        for (const reserva of reservasDoCliente) {
+            if (reserva.id_cliente == usuarioLogado.id_cliente) {
+                console.log(`Reserva número: ${reserva.id_reserva} | Quarto: ${reserva.tipoDeQuarto} | entrada: ${reserva.checkin} | saída: ${reserva.checkout} | status: ${reserva.status}`)
+                x += 1;
+            }
+        }
+        //Usuario escolhe qual reserva vai cancelar
+        console.log(`${x}: Voltar`)
+        const escolha = requisicao.question("Qual reserva deseja cancelar?");
+        const valorEscolha = parseInt(escolha);
+
+        let voltar = x
+        if (valorEscolha == voltar) {
+            return
+        }
+
+        //separar o indice e mudar o status da reserva
+        if (valorEscolha > 0 && valorEscolha < voltar) {
+            const inidiceDaReserva = valorEscolha - 1;
+            const reservaParaCancelar = reservasDoCliente[inidiceDaReserva]
+
+            if (reservaParaCancelar.status !== "Pendente") {
+                console.log("Não é possível canelar a reserva")
+                return
+            }
+
+            reservaParaCancelar.status = "Cancelada;"
+
+            //atualizar a disponibilidade do quarto
+            let quartoCancelado = null;
+            for (const quarto of this.quartos) {
+                if (quarto.tipoDeQuarto === reservaParaCancelar.tipoDeQuarto) {
+                    quartoCancelado = quarto
+                    break;
+                }
+            }
+
+            if (quartoCancelado) {
+                quartoCancelado.quantidade += 1;
+            }
+
+            console.log(`\nReserva para o quarto ${reservaParaCancelar.tipoDeQuarto} cancelada com sucesso!`)
+
+        } else {
+            console.log('Opção inválida')
+        }
+
+    }
+
 }
 
 const sistema = new Sistema;
@@ -288,6 +355,10 @@ while (!sairDoPrograma) {
                                 sistema.listarQuartosReserva(usuarioLogado);
                                 break;
 
+                            case "4":
+                                sistema.cancelarReserva(usuarioLogado);
+                                break;
+
                             case "6":
                                 sairDaAreaDoCliente = true
                                 break;
@@ -344,5 +415,3 @@ while (!sairDoPrograma) {
             break;
     }
 }
-
-

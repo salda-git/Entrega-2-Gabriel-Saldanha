@@ -216,6 +216,15 @@ class Sistema {
             console.log('Opção inválida')
         }
     }
+
+    listarReservas() {
+        let x = 1
+        for (const reserva of sistema.reservas) {
+            console.log(`${x}: ${reserva.id_reserva} | ${reserva.id_cliente} | ${reserva.tipoDeQuarto} | ${reserva.checkin}| ${reserva.checkout}| ${reserva.status}`)
+            x += 1;
+        }
+
+    }
 }
 
 const sistema = new Sistema;
@@ -263,6 +272,7 @@ while (!sairDoPrograma) {
                         const numeroÁreaCLiente = requisicao.question("Opcao escolhida: \n");
 
                         switch (numeroÁreaCLiente) {
+
                             case "1":
                                 console.log("\n" + "=".repeat(40));
                                 console.log(`${usuarioLogado.nome}`);
@@ -302,6 +312,11 @@ while (!sairDoPrograma) {
                         const numeroÁreaFuncioario = requisicao.question("Opcao escolhida: ");
 
                         switch (numeroÁreaFuncioario) {
+
+                            case "2":
+                                sistema.listarReservas();
+                                break;
+
                             case "7":
                                 sairDaAreaDoFuncionário = true;
                                 break;

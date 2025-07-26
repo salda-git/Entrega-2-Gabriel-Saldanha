@@ -47,6 +47,12 @@ class Sistema {
         //FALTA LEVANTAR OS ERROS
 
         if (cliente_ou_funcionario === "1") {
+            for (const i of this.clientes) {
+                if (i.email === email) {
+                    console.log("Cliente ja cadastrado")
+                    return null
+                }
+            }
             const novoCLiente = new Cliente(this.proximoID, nome, email, senha, cliente_ou_funcionario);
             this.clientes.push(novoCLiente);
             this.proximoID += 1;
@@ -55,12 +61,20 @@ class Sistema {
             return novoCLiente;
 
         } else if (cliente_ou_funcionario === "2") {
+            for (const i of this.funcionarios) {
+                if (i.email === email) {
+                    console.log("Funcionário ja cadastrado")
+                    return null
+                }
+
+            }
             const novoFuncionario = new Funcionario(this.proximoID, nome, email, senha, cliente_ou_funcionario);
             this.funcionarios.push(novoFuncionario);
             this.proximoID += 1;
             console.log("Cadastro realizado com sucesso!");
 
             return novoFuncionario;
+
         }
     }
 

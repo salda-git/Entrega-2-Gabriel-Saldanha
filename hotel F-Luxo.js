@@ -35,7 +35,7 @@ class Quartos {
 //definindo a funcionalidades
 class Sistema {
     constructor(usuario, quartos, funcionarios) {
-        this.usuarios = [];
+        this.clientes = [];
         this.funcionarios = [];
         this.proximoID = 1;
     }
@@ -43,19 +43,22 @@ class Sistema {
     cadastrarUsuario(nome, email, senha, cliente_ou_funcionario) {
         //diferenciar cliente e funcionario por: cliente = 1, funcionario = 2
 
-        if (cliente_ou_funcionario == "1") {
+        if (cliente_ou_funcionario === "1") {
             const novoCLiente = new Cliente(this.proximoID, nome, email, senha, cliente_ou_funcionario);
-            this.usuarios.push(novoCLiente);
+            this.clientes.push(novoCLiente);
             this.proximoID += 1;
             console.log("Cadastro realizado com sucesso!")
+            console.log(`${cliente_ou_funcionario}`);
+
 
             return novoCLiente;
 
-        } else if (cliente_ou_funcionario == "2") {
+        } else if (cliente_ou_funcionario === "2") {
             const novoFuncionario = new Funcionario(this.proximoID, nome, email, senha, cliente_ou_funcionario);
-            this.usuarios.push(novoFuncionario);
+            this.funcionarios.push(novoFuncionario);
             this.proximoID += 1;
-            console.log("Cadastro realizado com sucesso!")
+            console.log("Cadastro realizado com sucesso!");
+            console.log(`${cliente_ou_funcionario}`);
 
             return novoFuncionario;
         }
@@ -63,20 +66,33 @@ class Sistema {
 
     fazerLogin(email, senha) {
         //achar o usuario usando for
+
+        //1 - ver se o usuário é cliente
         let buscarUsuario = null;
-        for (const usuario of this.usuarios) {
+
+        for (const usuario of this.clientes) {
             if (usuario.email == email && usuario.senha == senha) {
                 buscarUsuario = usuario;
                 break;
 
             }
         }
+
+        //2 - ver se o usuário é funcionário  
+        for (const usuario of this.funcionarios) {
+
+            if (usuario.email === email && usuario.senha === senha) {
+                buscarUsuario = usuario
+                break;
+            }
+        }
+
         //identificar se há ou não cadastro
         if (buscarUsuario) {
             console.log("Login bem sucedido!");
             return buscarUsuario;
         } else {
-            console.log("Cliente não encontrado.");
+            console.log("Usuário não encontrado.");
             return null
         }
     }
@@ -106,67 +122,70 @@ while (!sairDoPrograma) {
             //entrando na aba de login do usuario
 
             if (usuarioLogado) {
-                switch (usuarioLogado.cliente_ou_funcionario) {
-                    case "1":
-                        console.log(`Bem vindo(a), ${usuarioLogado.nome}!`);
 
-                        let sairDaAreaDoCliente = false;
-                        while (!sairDaAreaDoCliente) {
-                            console.log("=".repeat(12) + "Área do Cliente" + "=".repeat(12));
-                            console.log("1: Ver Meus Dados");
-                            console.log("2: Ver Lista de Quartos");
-                            console.log("3: Fazer reserva")
-                            console.log("4: Cancelar reserva");
-                            console.log("5: Ver minhas reservas");
-                            console.log("6: Voltar ao Menu Pricipal");
-                            const numeroÁreaCLiente = requisicao.question("Opcao escolhida: ");
+                if (usuarioLogado instanceof Cliente) {
 
-                            switch (numeroÁreaCLiente) {
-                                case "1":
-                                    console.log(`${usuarioLogado.nome}`);
-                                    console.log(`${usuarioLogado.email}`);
+                    console.log(`Bem vindo(a), ${usuarioLogado.nome}!`);
 
-                                case "6":
-                                    sairDaAreaDoCliente = true
-                                    break;
+                    let sairDaAreaDoCliente = false;
+                    while (!sairDaAreaDoCliente) {
+                        console.log("=".repeat(12) + "Área do Cliente" + "=".repeat(12));
+                        console.log("1: Ver Meus Dados");
+                        console.log("2: Ver Lista de Quartos");
+                        console.log("3: Fazer reserva")
+                        console.log("4: Cancelar reserva");
+                        console.log("5: Ver minhas reservas");
+                        console.log("6: Voltar ao Menu Pricipal");
+                        const numeroÁreaCLiente = requisicao.question("Opcao escolhida: ");
 
-                            }
+                        switch (numeroÁreaCLiente) {
+                            case "1":
+                                console.log(`${usuarioLogado.nome}`);
+                                console.log(`${usuarioLogado.email}`);
 
-                        }
-                    case "2":
-                        console.log(`Bem vindo(a) ${usuarioLogado.nome}`);
-
-                        let sairDaAreaDoFuncionário = false;
-                        while (!sairDaAreaDoFuncionário) {
-                            console.log("=".repeat(12) + "Área do Funcionáro" + "=".repeat(12));
-                            console.log("1: Ver Meus Dados");
-                            console.log("2: Ver Lista de Reservas");
-                            console.log("3: Ver Lista de Quartos")
-                            console.log("4: Ver Lista de Clientes");
-                            console.log("5: Mudar Status da Reserva");
-                            console.log("6: Adicionar Quarto");
-                            const numeroÁreaFuncioario = requisicao.question("Opcao escolhida: ");
-
-                            switch (numeroÁreaFuncioario) {
-                                case "6":
-                                    sairDaAreaDoFuncionário = true;
-                                    break;
-                            }
+                            case "6":
+                                sairDaAreaDoCliente = true
+                                break;
 
                         }
 
+                    }
+
+                } else if (usuarioLogado instanceof Funcionario) {
+                    console.log(`Bem vindo(a) ${usuarioLogado.nome}`);
+
+                    let sairDaAreaDoFuncionário = false;
+                    while (!sairDaAreaDoFuncionário) {
+                        console.log("=".repeat(12) + "Área do Funcionáro" + "=".repeat(12));
+                        console.log("1: Ver Meus Dados");
+                        console.log("2: Ver Lista de Reservas");
+                        console.log("3: Ver Lista de Quartos")
+                        console.log("4: Ver Lista de Clientes");
+                        console.log("5: Mudar Status da Reserva");
+                        console.log("6: Adicionar Quarto");
+                        const numeroÁreaFuncioario = requisicao.question("Opcao escolhida: ");
+
+                        switch (numeroÁreaFuncioario) {
+                            case "6":
+                                sairDaAreaDoFuncionário = true;
+                                break;
+                        }
+
+                    }
 
                 }
+
             }
 
             break;
 
         case "2":
             console.log("=".repeat(40));
+            tipo_de_cadastro = requisicao.question("Qual o tipo do Cadastro?\n1: Cadastro de cliente \n2: Cadastro de funcionario\nResposta: ")
             nome = requisicao.question("Nome: ")
             email = requisicao.question("Email: ");
             senha = requisicao.question("Senha: ");
-            sistema.cadastrarUsuario(nome, email, senha,);
+            sistema.cadastrarUsuario(nome, email, senha, tipo_de_cadastro);
             break;
 
         case "3":

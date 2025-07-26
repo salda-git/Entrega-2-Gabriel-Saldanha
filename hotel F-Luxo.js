@@ -1,8 +1,7 @@
 var requisicao = require('readline-sync')
 //definir as características do login
 class Usuário {
-    constructor(id, cpf, email, senha) {
-        this.id = id;
+    constructor(cpf, email, senha) {
         this.cpf = cpf;
         this.email = email;
         this.senha = senha;
@@ -10,36 +9,52 @@ class Usuário {
 }
 
 class Cliente extends Usuário {
-    constructor(id, cpf, email, senha) {
-        super(id, cpf, email, senha);
+    constructor(id_cliente, cpf, email, senha) {
+        super(cpf, email, senha);
+        this.id_cliente = id_cliente
         this.nome = nome;
     }
 }
 
 class Funcionario extends Usuário {
-    constructor(id, cpf, email, senha, nome_de_usuario) {
-        super(id, cpf, email, senha);
+    constructor(id_funcionario, cpf, email, senha, nome_de_usuario) {
+        super(cpf, email, senha);
+        this.id_funcionario = id_funcionario
         this.nome_de_usuario = nome_de_usuario;
     }
 }
 
 class Quartos {
-    constructor(nome, camas, preço, quantidade) {
-        this.nome = nome;
+    constructor(tipoDeQuarto, camas, preço, quantidade) {
+        this.tipoDeQuarto = tipoDeQuarto;
         this.camas = camas;
         this.preço = preço;
         this.quantidade = quantidade;
     }
 }
 
+class Reserva {
+    constructor(id_reserva, id_cliente, tipoDeQuarto, checkin, checkout, status) {
+        this.id_cliente = id_cliente;
+        this.tipoDeQuarto = tipoDeQuarto
+        this.status = status;
+        this.id_reserva = id_reserva;
+        this.checkin = checkin;
+        this.checkout = checkout;
+    }
+}
+
 
 //definindo a funcionalidades
 class Sistema {
-    constructor(usuario, quartos, funcionarios) {
+    constructor() {
         this.clientes = [];
         this.funcionarios = [];
         this.quartos = [];
-        this.proximoID = 1;
+        this.reservas = []
+        this.proximoID_cliente = 1;
+        this.proximoID_funcionario = 1;
+        this.proximoID_reserva = 1;
     }
 
     cadastrarUsuario(nome, email, senha, cliente_ou_funcionario) {
@@ -53,9 +68,9 @@ class Sistema {
                     return null
                 }
             }
-            const novoCLiente = new Cliente(this.proximoID, nome, email, senha, cliente_ou_funcionario);
+            const novoCLiente = new Cliente(this.proximoID_cliente, nome, email, senha, cliente_ou_funcionario);
             this.clientes.push(novoCLiente);
-            this.proximoID += 1;
+            this.proximoID_cliente += 1;
             console.log("Cadastro realizado com sucesso!")
 
             return novoCLiente;
@@ -68,9 +83,9 @@ class Sistema {
                 }
 
             }
-            const novoFuncionario = new Funcionario(this.proximoID, nome, email, senha, cliente_ou_funcionario);
+            const novoFuncionario = new Funcionario(this.proximoID_funcionario, nome, email, senha, cliente_ou_funcionario);
             this.funcionarios.push(novoFuncionario);
-            this.proximoID += 1;
+            this.proximoID_funcionario += 1;
             console.log("Cadastro realizado com sucesso!");
 
             return novoFuncionario;
@@ -116,6 +131,60 @@ class Sistema {
         console.log(`${novoQuarto.nome} adicionado com sucesso!`)
         return novoQuarto;
     }
+
+    listarQuartos() {
+        let x = 1
+        for (const quarto of sistema.quartos) {
+            console.log(`${x}: ${quarto.tipoDeQuarto}`)
+            x += 1;
+        }
+        let voltar = x
+        console.log(`${voltar}: voltar para Àrea do Cliente`);
+        numeroListaQuartos = requisicao.question("Digite o numero do quarto para ver os detalhes ou para voltar:")
+        const valor = parseInt(numeroListaQuartos);
+
+        if (valor == voltar) {
+            return
+        }
+
+        if (valor > 0 && valor < voltar) {
+            const indiceQuarto = valor - 1;
+            const quartoSelecionado = sistema.quartos(indiceQuarto);
+
+            console.log(`Nome: ${quartoSelecionado.tipoDeQuarto}`);
+            console.log(`Camas: ${quartoSelecionado.camas}`);
+            console.log(`Diária: ${quartoSelecionado.diaria}`);
+            console.log(`Disponibilidade: ${quartoSelecionado.quantidade}`);
+        } else {
+            console.log('Opção inválida')
+        }
+    }
+    fazerReserva(tipoDeQuartoReserva, id_cliente, checkin, checkout) {
+        //encontrar o quarto
+        let quartoEncontrado = null
+        for (const i of this.quartos) {
+            if (i.tipoDeQuarto === tipoDeQuartoReserva) {
+                quartoEncontrado = i;
+                break;
+            }
+        }
+
+        //verificar se há disponibilidade e fazer reserva
+        if (quartoEncontrado && quartoEncontrado.quantidade > 0) {
+            const novaReserva = new Reserva(this.proximoID_reserva, id_cliente, tipoDeQuarto, checkin, checkout)
+
+
+            this.reservas.push(novaReserva);
+            this.proximoID_reserva += 1;
+            quartoEncontrado.quantidade -= 1;
+
+            console.log(`Reserva para ${tipoDeQuarto} realizada com sucesso!`);
+            return novaReserva;
+        } else {
+            console.log(`Não há ${tipoDeQuarto} disponíveis`);
+            return null;
+        }
+    }
 }
 
 const sistema = new Sistema;
@@ -125,7 +194,7 @@ sistema.adicionarQuarto("Quarto Standard", 2, 150, 10);
 sistema.adicionarQuarto("Quarto Família", 4, 250, 3);
 
 
-//definir o que irá aparecer para o usuário
+//definir o que irá aparecer para o usuário no console
 let sairDoPrograma = false;
 while (!sairDoPrograma) {
 
@@ -167,34 +236,15 @@ while (!sairDoPrograma) {
                                 console.log("\n" + "=".repeat(40));
                                 console.log(`${usuarioLogado.nome}`);
                                 console.log(`${usuarioLogado.email}`);
+                                break;
 
                             //listar os quartos disponiveis, com a opção de clicar para ver os seus detalhes
                             case "2":
-                                console.log("\n" + "=".repeat(40));
-                                let x = 1
-                                for (const quarto of sistema.quartos) {
-                                    console.log(`${x}: ${quarto.nome}`)
-                                    x += 1;
-                                }
-                                let voltar = x
-                                console.log(`${voltar}: voltar para Àrea do Cliente`);
-                                numeroListaQuartos = requisicao.question("Digite o numero do quarto para ver os detalhes ou para voltar:")
-                                const valor = parseInt(numeroListaQuartos);
+                                sistema.listarQuartos();
+                                break
 
-                                if (valor == voltar) {
-                                    break;
-                                }
-
-                                if (valor > 0 && valor != voltar) {
-                                    const indiceQuarto = valor - 1;
-                                    const quartoSelecionado = sistema.quartos(indiceQuarto);
-
-                                    console.log(`Nome: ${quartoSelecionado.nome}`);
-                                    console.log(`Nome: ${quartoSelecionado.camas}`);
-                                    console.log(`Nome: ${quartoSelecionado.diaria}`);
-                                    console.log(`Nome: ${quartoSelecionado.quantidade}`);
-
-                                }
+                            case "3":
+                                break
 
                             case "6":
                                 sairDaAreaDoCliente = true

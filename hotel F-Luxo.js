@@ -56,6 +56,7 @@ class Sistema {
         this.proximoID_cliente = 1;
         this.proximoID_funcionario = 1;
         this.proximoID_reserva = 1;
+        this.avaliacao = { nota: null, comentario: null }
     }
     //-----------funções pagina inicial----------------
     cadastrarUsuario(nome, email, senha, cliente_ou_funcionario) {
@@ -317,8 +318,12 @@ class Sistema {
                 }
             }
 
+            const comentario = requisicao.question('Por favor, deixe um comentário sobre a sua estadia: ');
+
+
             // 6. Salva a avaliação na reserva
-            reservaParaAvaliar.avaliacao = nota;
+            reservaParaAvaliar.avaliacao.nota = nota;
+            reservaParaAvaliar.avaliacao.comentario = comentario;
 
             console.log('\nObrigado pela sua avaliação! Seu feedback é muito importante para nós.');
 
@@ -415,6 +420,34 @@ class Sistema {
         } else {
             console.log('\nOpção inválida. Por favor, tente novamente.');
         }
+    }
+
+    verAvaliacoes() {
+        console.log('\n--- Avaliações das Estadias ---');
+
+        // Filtra as reservas que têm uma nota de avaliação.
+        const reservasAvaliadas = this.reservas.filter(reserva => reserva.avaliacao.nota !== null);
+
+        if (reservasAvaliadas.length === 0) {
+            console.log('Nenhuma estadia foi avaliada ainda.');
+            return;
+        }
+
+        // Lista cada avaliação
+        console.log('Avaliações recebidas:');
+        reservasAvaliadas.forEach(reserva => {
+            console.log(`\n- Quarto: ${reserva.tipoDeQuarto}`);
+            console.log(`  Nota: ${reserva.avaliacao.nota} de 5`);
+            console.log(`  Comentário: "${reserva.avaliacao.comentario}"`);
+        });
+
+        // Calcula a média geral das notas.
+        const somaDasNotas = reservasAvaliadas.reduce((total, reserva) => total + reserva.avaliacao.nota, 0);
+        const media = somaDasNotas / reservasAvaliadas.length;
+
+        console.log('\n' + '-'.repeat(30));
+        console.log(`NOTA MÉDIA GERAL: ${media.toFixed(1)} de 5`);
+        console.log('-'.repeat(30));
     }
 
 }
@@ -514,7 +547,8 @@ while (!sairDoPrograma) {
                         console.log("4: Ver Lista de Clientes");
                         console.log("5: Mudar Status da Reserva");
                         console.log("6: Adicionar Quarto");
-                        console.log("7: Sair da Área do funcionário")
+                        console.log("7: Ver avaliações")
+                        console.log("8: Sair da Área do funcionário")
                         const numeroÁreaFuncioario = requisicao.question("Opcao escolhida: ");
 
                         switch (numeroÁreaFuncioario) {
@@ -546,6 +580,10 @@ while (!sairDoPrograma) {
                                 break;
 
                             case "7":
+                                sistema.verAvaliacoes()
+                                break
+
+                            case "8":
                                 sairDaAreaDoFuncionário = true;
                                 break;
                         }

@@ -1,16 +1,9 @@
 [
   {
     "id": 1,
-    "nome": "Gabriel",
+    "nome": "Gabriel Saldanha",
     "cpf": null,
-    "email": "gabriel@gmail.com",
+    "email": "gabrielp.saldanha@gmail.com",
     "senha": "senhadogabriel"
-  },
-  {
-    "id": 1,
-    "nome": "Joao Marcelo",
-    "cpf": null,
-    "email": "JM@gmail.com",
-    "senha": "senhadojm"
   }
 ]

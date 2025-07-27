@@ -5,24 +5,25 @@ const fs = require('fs')
 
 class Usuario {
     // A ordem oficial é definida aqui: id, nome, cpf, email, senha
-    constructor(id, nome, cpf, email, senha) {
+    constructor(id, nome, cpf, email, senha, dataNascimento) {
         this.id = id;
         this.nome = nome;
         this.cpf = cpf;
         this.email = email;
         this.senha = senha;
+        this.dataNascimento = dataNascimento;
     }
 }
 
 class Cliente extends Usuario {
-    constructor(id, nome, cpf, email, senha) {
-        super(id, nome, cpf, email, senha);
+    constructor(id, nome, cpf, email, senha, dataNascimento) {
+        super(id, nome, cpf, email, senha, dataNascimento);
     }
 }
 
 class Funcionario extends Usuario {
-    constructor(id, nome, cpf, email, senha) {
-        super(id, nome, cpf, email, senha);
+    constructor(id, nome, cpf, email, senha, dataNascimento) {
+        super(id, nome, cpf, email, senha, dataNascimento);
     }
 }
 
@@ -215,97 +216,106 @@ class Sistema {
         }
     }
 
-    fazerReserva(tipoDeQuarto, id, checkin, checkout) {
-        //encontrar o quarto
-        let quartoEncontrado = null
-        for (const i of this.quartos) {
-            if (i.tipoDeQuarto === tipoDeQuarto) {
-                quartoEncontrado = i;
-                break;
-            }
-        }
+    fazerReserva(tipoDeQuarto, id_cliente, checkin, checkout) {
 
-        //verificar se há disponibilidade e fazer reserva
-        if (quartoEncontrado && quartoEncontrado.quantidade > 0) {
-            const novaReserva = new Reserva(this.proximoID_reserva, id, tipoDeQuarto, checkin, checkout, 'pendente')
+        const tipoDeQuartoInfo = this.quartos.find(q => q.tipoDeQuarto === tipoDeQuarto);
 
-
-            this.reservas.push(novaReserva);
-            this.proximoID_reserva += 1;
-            quartoEncontrado.quantidade -= 1;
-
-            console.log(`Reserva para ${tipoDeQuarto} realizada com sucesso!`);
-            return novaReserva;
-        } else {
-            console.log(`Não há ${tipoDeQuarto} disponíveis`);
+        if (!tipoDeQuartoInfo) {
+            console.log(`\nErro: O tipo de quarto '${tipoDeQuarto}' não existe.`);
             return null;
         }
+
+        const dataCheckinDesejada = this._converterData(checkin);
+        const dataCheckoutDesejada = this._converterData(checkout);
+
+        // Verificar se há conflito de datas
+
+        const reservasConflitantes = this.reservas.filter(reserva => {
+            // Ignoramos reservas que já foram canceladas
+            if (reserva.tipoDeQuarto !== tipoDeQuarto || reserva.status === 'Cancelada') {
+                return false;
+            }
+
+            const dataCheckinExistente = this._converterData(reserva.checkin);
+            const dataCheckoutExistente = this._converterData(reserva.checkout);
+
+            // A lógica de conflito: uma reserva conflita se o período desejado
+
+            return dataCheckinDesejada < dataCheckoutExistente && dataCheckoutDesejada > dataCheckinExistente;
+        });
+
+        //  Verificar a disponibilidade
+        if (reservasConflitantes.length >= tipoDeQuartoInfo.quantidade) {
+            console.log(`\nDesculpe, não há quartos do tipo '${tipoDeQuarto}' disponíveis para o período de ${checkin} a ${checkout}.`);
+            return null;
+        }
+
+        const novaReserva = new Reserva(
+            this.proximoIdReserva,
+            id_cliente,
+            tipoDeQuarto,
+            checkin,
+            checkout,
+            'Pendente'
+        );
+
+        this.reservas.push(novaReserva);
+        this.proximoIdReserva++;
+
+        console.log(`\nReserva para o quarto '${tipoDeQuarto}' de ${checkin} a ${checkout} realizada com sucesso!`);
+
+        this.salvarReservas();
+
+        return novaReserva;
     }
 
     cancelarReserva(usuarioLogado) {
-        //filtrar as reservas desse cliente
-        const reservasDoCliente = [];
-        for (const reserva of this.reservas) {
-            if (reserva.id === usuarioLogado.id) {
-                reservasDoCliente.push(reserva)
-            }
+        console.log('\n--- Cancelar Reserva ---');
 
-        }
+        // Filtra para obter apenas as reservas pendentes do usuário logado.
+        const reservasDoCliente = this.reservas.filter(reserva =>
+            reserva.id === usuarioLogado.id && reserva.status.toLowerCase() === 'pendente'
+        );
 
         if (reservasDoCliente.length === 0) {
-            console.log("Nenhume reserva encontrada")
-            return
+            console.log('Você não possui nenhuma reserva pendente para cancelar.');
+            return;
         }
 
-        //listar as reservas da lista filtrada
+        // Lista as reservas que podem ser canceladas.
+        console.log('Suas Reservas Pendentes:');
         let x = 1;
         for (const reserva of reservasDoCliente) {
-            if (reserva.id == usuarioLogado.id) {
-                console.log(`Reserva número: ${reserva.id_reserva} | Quarto: ${reserva.tipoDeQuarto} | entrada: ${reserva.checkin} | saída: ${reserva.checkout} | status: ${reserva.status}`)
-                x += 1;
-            }
+            console.log(`${x}: Quarto: ${reserva.tipoDeQuarto} | Check-in: ${reserva.checkin}`);
+            x++;
         }
-        //Usuario escolhe qual reserva vai cancelar
-        console.log(`${x}: Voltar`)
-        const escolha = requisicao.question("Qual reserva deseja cancelar?");
+
+        const voltar = x;
+        console.log(`${voltar}: Voltar`);
+
+        // Pede ao usuário para escolher qual reserva cancelar.
+        const escolha = requisicao.question("\nQual reserva (pelo numero) deseja cancelar? ");
         const valorEscolha = parseInt(escolha);
 
-        let voltar = x
-        if (valorEscolha == voltar) {
-            return
+        if (valorEscolha === voltar) {
+            return;
         }
 
-        //separar o indice e mudar o status da reserva
+        // Valida a escolha e altera o status.
         if (valorEscolha > 0 && valorEscolha < voltar) {
-            const inidiceDaReserva = valorEscolha - 1;
-            const reservaParaCancelar = reservasDoCliente[inidiceDaReserva]
+            const indiceDaReserva = valorEscolha - 1;
+            const reservaParaCancelar = reservasDoCliente[indiceDaReserva];
 
-            if (reservaParaCancelar.status !== "Pendente") {
-                console.log("Não é possível canelar a reserva")
-                return
-            }
+            reservaParaCancelar.status = "Cancelada";
 
-            reservaParaCancelar.status = "Cancelada"
+            console.log(`\nReserva para o quarto '${reservaParaCancelar.tipoDeQuarto}' foi cancelada com sucesso!`);
 
-            //atualizar a disponibilidade do quarto
-            let quartoCancelado = null;
-            for (const quarto of this.quartos) {
-                if (quarto.tipoDeQuarto === reservaParaCancelar.tipoDeQuarto) {
-                    quartoCancelado = quarto
-                    break;
-                }
-            }
-
-            if (quartoCancelado) {
-                quartoCancelado.quantidade += 1;
-            }
-
-            console.log(`\nReserva para o quarto ${reservaParaCancelar.tipoDeQuarto} cancelada com sucesso!`)
+            // Garante que a alteração seja salva no arquivo.
+            this.salvarReservas();
 
         } else {
-            console.log('Opção inválida')
+            console.log('\nOpção inválida.');
         }
-
     }
 
     listarReservasCliente(usuarioLogado) {
@@ -392,12 +402,31 @@ class Sistema {
     }
 
     //---------------funções funcionário---------------
-    adicionarQuarto(tipoDeQuarto, camas, diaria, quantidade) {
-        const novoQuarto = new Quartos(tipoDeQuarto, camas, diaria, quantidade);
-        this.quartos.push(novoQuarto);
-        console.log(`${novoQuarto.tipoDeQuarto} adicionado com sucesso!`)
-        this.salvarQuartos();
-        return novoQuarto;
+    adicionarQuarto() {
+        console.log('\n--- Adicionar Novo Quarto ---');
+
+        const tipoDeQuarto = requisicao.question('Qual o tipo do quarto (ex: Suite Luxo)? ');
+        const camas = requisicao.question('Quantidade de camas: ');
+        const preco = requisicao.question('Preco da diaria (ex: 150.50): ');
+        const quantidade = requisicao.question('Quantidade de quartos deste tipo: ');
+
+        const camasNum = parseInt(camas);
+        const precoNum = parseFloat(preco);
+        const quantidadeNum = parseInt(quantidade);
+
+        if (tipoDeQuarto && !isNaN(camasNum) && !isNaN(precoNum) && !isNaN(quantidadeNum)) {
+
+            const novoQuarto = new Quartos(tipoDeQuarto, camasNum, precoNum, quantidadeNum);
+            this.quartos.push(novoQuarto);
+            console.log(`\nQuarto '${novoQuarto.tipoDeQuarto}' adicionado com sucesso!`);
+
+            this.salvarQuartos();
+            return novoQuarto;
+
+        } else {
+            console.log('\nDados inválidos. Operação de adicionar quarto foi cancelada.');
+            return null;
+        }
     }
 
     listarQuartosReserva(usuarioLogado) {
@@ -486,7 +515,7 @@ class Sistema {
         console.log('\n--- Avaliações das Estadias ---');
 
         // Filtra as reservas que têm uma nota de avaliação.
-        const reservasAvaliadas = this.reservas.filter(reserva => reserva.avaliacao.nota !== null);
+        const reservasAvaliadas = this.reservas.filter(reserva => reserva.avaliacao && reserva.avaliacao.nota !== null);
 
         if (reservasAvaliadas.length === 0) {
             console.log('Nenhuma estadia foi avaliada ainda.');
@@ -589,13 +618,16 @@ class Sistema {
 
         console.log('Dados carregados com sucesso!');
     }
+
+    //---------funções auxiliares----------
+    _converterData(stringData) {
+        const [dia, mes, ano] = stringData.split('/');
+        return new Date(ano, mes - 1, dia);
+    }
+
+
 }
-
 const sistema = new Sistema;
-
-sistema.adicionarQuarto("Suite", 2, 300, 5);
-sistema.adicionarQuarto("Quarto Standard", 2, 150, 10);
-sistema.adicionarQuarto("Quarto Família", 4, 250, 3);
 
 
 //definir o que irá aparecer para o usuário no console
@@ -633,7 +665,8 @@ while (!sairDoPrograma) {
                         console.log("4: Cancelar reserva");
                         console.log("5: Ver minhas reservas");
                         console.log("6: Avaliar estadia");
-                        console.log("7: Voltar ao Menu Pricipal");
+                        console.log("7: Alterar dados")
+                        console.log("8: Voltar ao Menu Pricipal");
                         const numeroÁreaCLiente = requisicao.question("Opcao escolhida: \n");
 
                         switch (numeroÁreaCLiente) {
@@ -667,6 +700,9 @@ while (!sairDoPrograma) {
                                 break
 
                             case "7":
+                                sistema.mudarDados(usuarioLogado);
+
+                            case "8":
                                 sairDaAreaDoCliente = true
                                 break;
 

@@ -1,20 +1,8 @@
 [
   {
-    "tipoDeQuarto": "Suite",
-    "camas": 2,
-    "preço": 300,
-    "quantidade": 5
-  },
-  {
-    "tipoDeQuarto": "Quarto Standard",
-    "camas": 2,
-    "preço": 150,
-    "quantidade": 10
-  },
-  {
-    "tipoDeQuarto": "Quarto Família",
+    "tipoDeQuarto": "Quarto Fam�lia",
     "camas": 4,
-    "preço": 250,
-    "quantidade": 3
+    "preço": 300,
+    "quantidade": 8
   }
 ]

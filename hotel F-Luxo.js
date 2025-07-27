@@ -56,7 +56,7 @@ class Sistema {
         this.proximoID_funcionario = 1;
         this.proximoID_reserva = 1;
     }
-
+    //-----------funções pagina inicial----------------
     cadastrarUsuario(nome, email, senha, cliente_ou_funcionario) {
         //diferenciar cliente e funcionario por: cliente = 1, funcionario = 2
         //FALTA LEVANTAR OS ERROS
@@ -124,21 +124,7 @@ class Sistema {
             return null
         }
     }
-
-    listarClientes() {
-        let x = 1
-        for (const cliente of this.clientes) {
-            console.log(`${x}: ${cliente.id_cliente} | ${x}: ${cliente.nome} | ${x}: ${cliente.email} | `)
-            x += 1;
-        }
-    }
-
-    adicionarQuarto(tipoDeQuarto, camas, diaria, quantidade) {
-        const novoQuarto = new Quartos(tipoDeQuarto, camas, diaria, quantidade);
-        this.quartos.push(novoQuarto);
-        console.log(`${novoQuarto.tipoDeQuarto} adicionado com sucesso!`)
-        return novoQuarto;
-    }
+    //---------------funções cliente----------------
 
     listarQuartosDetalhes() {
         let x = 1
@@ -192,70 +178,6 @@ class Sistema {
         } else {
             console.log(`Não há ${tipoDeQuarto} disponíveis`);
             return null;
-        }
-    }
-
-    listarQuartosReserva(usuarioLogado) {
-        let x = 1
-        for (const quarto of sistema.quartos) {
-            console.log(`${x}: ${quarto.tipoDeQuarto}`)
-            x += 1;
-        }
-        let voltar = x
-        console.log(`${voltar}: voltar para Àrea do Cliente`);
-        const numeroListaQuartos = requisicao.question("Qual quarto deseja reservar?: ")
-        const valor = parseInt(numeroListaQuartos);
-
-        if (valor == voltar) {
-            return
-        }
-
-        if (valor > 0 && valor < voltar) {
-            const indiceQuarto = valor - 1;
-            const quartoSelecionado = this.quartos[indiceQuarto];
-
-            console.log(`Qual a data de entrada e saída?`);
-            console.log("Use o padrão XX/XX/XXXX")
-            const checkin = requisicao.question("Checkin: ")
-            const checkout = requisicao.question("Checkout: ")
-            this.fazerReserva(quartoSelecionado.tipoDeQuarto, usuarioLogado.id_cliente, checkin, checkout)
-
-        } else {
-            console.log('Opção inválida')
-        }
-    }
-
-    listarReservas() {
-        let x = 1
-        for (const reserva of this.reservas) {
-            console.log(`${x}: ${reserva.id_reserva} | ${reserva.id_cliente} | ${reserva.tipoDeQuarto} | ${reserva.checkin}| ${reserva.checkout}| ${reserva.status}`)
-            x += 1;
-        }
-
-    }
-
-    listarReservasCliente(usuarioLogado) {
-        //filtrar as reservas desse cliente
-        const reservasDoCliente = [];
-        for (const reserva of this.reservas) {
-            if (reserva.id_cliente === usuarioLogado.id_cliente) {
-                reservasDoCliente.push(reserva)
-            }
-
-        }
-
-        if (reservasDoCliente.length === 0) {
-            console.log("Nenhuma reserva encontrada")
-            return
-        }
-
-        let x = 1;
-        for (const reserva of reservasDoCliente) {
-            console.log(`${x}: Quarto: ${reserva.tipoDeQuarto} | ` +
-                `Check-in: ${reserva.checkin} | ` +
-                `Checkout: ${reserva.checkout} | ` +
-                `Status: ${reserva.status}`)
-            x += 1
         }
     }
 
@@ -324,6 +246,123 @@ class Sistema {
         }
 
     }
+
+    listarReservasCliente(usuarioLogado) {
+        //filtrar as reservas desse cliente
+        const reservasDoCliente = [];
+        for (const reserva of this.reservas) {
+            if (reserva.id_cliente === usuarioLogado.id_cliente) {
+                reservasDoCliente.push(reserva)
+            }
+
+        }
+
+        if (reservasDoCliente.length === 0) {
+            console.log("Nenhuma reserva encontrada")
+            return
+        }
+
+        let x = 1;
+        for (const reserva of reservasDoCliente) {
+            console.log(`${x}: Quarto: ${reserva.tipoDeQuarto} | ` +
+                `Check-in: ${reserva.checkin} | ` +
+                `Checkout: ${reserva.checkout} | ` +
+                `Status: ${reserva.status}`)
+            x += 1
+        }
+    }
+
+    //---------------funções funcionário---------------
+    adicionarQuarto(tipoDeQuarto, camas, diaria, quantidade) {
+        const novoQuarto = new Quartos(tipoDeQuarto, camas, diaria, quantidade);
+        this.quartos.push(novoQuarto);
+        console.log(`${novoQuarto.tipoDeQuarto} adicionado com sucesso!`)
+        return novoQuarto;
+    }
+
+    listarQuartosReserva(usuarioLogado) {
+        let x = 1
+        for (const quarto of sistema.quartos) {
+            console.log(`${x}: ${quarto.tipoDeQuarto}`)
+            x += 1;
+        }
+        let voltar = x
+        console.log(`${voltar}: voltar para Àrea do Cliente`);
+        const numeroListaQuartos = requisicao.question("Qual quarto deseja reservar?: ")
+        const valor = parseInt(numeroListaQuartos);
+
+        if (valor == voltar) {
+            return
+        }
+
+        if (valor > 0 && valor < voltar) {
+            const indiceQuarto = valor - 1;
+            const quartoSelecionado = this.quartos[indiceQuarto];
+
+            console.log(`Qual a data de entrada e saída?`);
+            console.log("Use o padrão XX/XX/XXXX")
+            const checkin = requisicao.question("Checkin: ")
+            const checkout = requisicao.question("Checkout: ")
+            this.fazerReserva(quartoSelecionado.tipoDeQuarto, usuarioLogado.id_cliente, checkin, checkout)
+
+        } else {
+            console.log('Opção inválida')
+        }
+    }
+
+    listarReservas() {
+        console.log('\n--- Lista de Todas as Reservas ---');
+
+        if (this.reservas.length === 0) {
+            console.log('Nenhuma reserva foi feita');
+            return false;
+        }
+
+        let x = 1
+        for (const reserva of this.reservas) {
+            console.log(`${x}: ${reserva.id_reserva} | ${reserva.id_cliente} | ${reserva.tipoDeQuarto} | ${reserva.checkin}| ${reserva.checkout}| ${reserva.status}`)
+            x += 1;
+        }
+        return true
+    }
+
+    listarClientes() {
+        let x = 1
+        for (const cliente of this.clientes) {
+            console.log(`${x}: ${cliente.id_cliente} | ${x}: ${cliente.nome} | ${x}: ${cliente.email} | `)
+            x += 1;
+        }
+    }
+
+    mudarStatusReserva() {
+        console.log('\n--- Alterar Status da Reserva ---');
+        const haReservas = this.listarReservas();
+
+        if (!haReservas) {
+            return;
+        }
+
+        const escolhaReserva = requisicao.question('\nDigite o numero da reserva que deseja alterar: ');
+        const indice = parseInt(escolhaReserva) - 1;
+
+        // ETAPA 3: Validar a escolha do funcionário.
+        if (indice >= 0 && indice < this.reservas.length) {
+            const reservaParaMudar = this.reservas[indice];
+
+            // ETAPA 4: Pedir o novo status.
+            const novoStatus = requisicao.question(`Qual o novo status para a reserva ${reservaParaMudar.id_reserva}? (Ex: Confirmada, Finalizada): `);
+
+            // ETAPA 5: Atualizar o status.
+            reservaParaMudar.status = novoStatus;
+
+            console.log(`\nStatus da reserva ${reservaParaMudar.id_reserva} alterado para '${novoStatus}' com sucesso!`);
+
+        } else {
+            console.log('\nOpção inválida. Por favor, tente novamente.');
+        }
+    }
+
+
 
 }
 
@@ -395,6 +434,7 @@ while (!sairDoPrograma) {
 
                             case "5":
                                 sistema.listarReservasCliente(usuarioLogado);
+                                break
 
                             case "6":
                                 sairDaAreaDoCliente = true
@@ -438,6 +478,10 @@ while (!sairDoPrograma) {
                             case "4":
                                 sistema.listarClientes();
                                 break;
+
+                            case "5":
+                                sistema.mudarStatusReserva();
+                                break
 
                             case "7":
                                 sairDaAreaDoFuncionário = true;

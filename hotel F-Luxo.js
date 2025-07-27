@@ -17,10 +17,10 @@ class Cliente extends Usuário {
 }
 
 class Funcionario extends Usuário {
-    constructor(id_funcionario, cpf, email, senha, nome_de_usuario) {
+    constructor(id_funcionario, cpf, email, senha, nome) {
         super(cpf, email, senha);
         this.id_funcionario = id_funcionario
-        this.nome_de_usuario = nome_de_usuario;
+        this.nome = nome;
     }
 }
 
@@ -41,6 +41,7 @@ class Reserva {
         this.id_reserva = id_reserva;
         this.checkin = checkin;
         this.checkout = checkout;
+        this.avaliacao = null;
     }
 }
 
@@ -128,7 +129,7 @@ class Sistema {
 
     listarQuartosDetalhes() {
         let x = 1
-        for (const quarto of sistema.quartos) {
+        for (const quarto of this.quartos) {
             console.log(`${x}: ${quarto.tipoDeQuarto}`)
             x += 1;
         }
@@ -143,11 +144,11 @@ class Sistema {
 
         if (valor > 0 && valor < voltar) {
             const indiceQuarto = valor - 1;
-            const quartoSelecionado = sistema.quartos(indiceQuarto);
+            const quartoSelecionado = this.quartos[indiceQuarto];
 
             console.log(`Nome: ${quartoSelecionado.tipoDeQuarto}`);
             console.log(`Camas: ${quartoSelecionado.camas}`);
-            console.log(`Diária: ${quartoSelecionado.diaria}`);
+            console.log(`Diária: ${quartoSelecionado.preço}`);
             console.log(`Disponibilidade: ${quartoSelecionado.quantidade}`);
         } else {
             console.log('Opção inválida')
@@ -224,7 +225,7 @@ class Sistema {
                 return
             }
 
-            reservaParaCancelar.status = "Cancelada;"
+            reservaParaCancelar.status = "Cancelada"
 
             //atualizar a disponibilidade do quarto
             let quartoCancelado = null;
@@ -269,6 +270,60 @@ class Sistema {
                 `Checkout: ${reserva.checkout} | ` +
                 `Status: ${reserva.status}`)
             x += 1
+        }
+    }
+
+
+    avaliarEstadia(usuarioLogado) {
+        console.log('\n--- Avaliar Estadia ---');
+
+        // 1. Filtra apenas as reservas do cliente que estão "Finalizadas" e ainda não foram avaliadas
+        const estadiasParaAvaliar = this.reservas.filter(reserva =>
+            reserva.id_cliente === usuarioLogado.id_cliente &&
+            reserva.status === 'Finalizada' &&
+            reserva.avaliacao === null
+        );
+
+        // 2. Verifica se existem estadias elegíveis para avaliação
+        if (estadiasParaAvaliar.length === 0) {
+            console.log('Você não possui nenhuma estadia finalizada para avaliar no momento.');
+            return;
+        }
+
+        // 3. Lista as estadias que podem ser avaliadas
+        console.log('Qual estadia você gostaria de avaliar?');
+        estadiasParaAvaliar.forEach((reserva, index) => {
+            console.log(`${index + 1}: Quarto: ${reserva.tipoDeQuarto} | Checkout em: ${reserva.checkout}`);
+        });
+
+        const voltar = estadiasParaAvaliar.length + 1;
+        console.log(`${voltar}: Voltar`);
+
+        // 4. Pede a escolha do usuário
+        const escolha = parseInt(requisicao.question('\nOpcao escolhida: '));
+
+        if (escolha === voltar) return;
+
+        if (escolha > 0 && escolha <= estadiasParaAvaliar.length) {
+            const indice = escolha - 1;
+            const reservaParaAvaliar = estadiasParaAvaliar[indice];
+
+            // 5. Pede a nota e valida a entrada (só aceita números de 1 a 5)
+            let nota = 0;
+            while (nota < 1 || nota > 5 || isNaN(nota)) {
+                nota = parseInt(requisicao.question(`\nQual sua nota para a estadia no quarto '${reservaParaAvaliar.tipoDeQuarto}' (de 1 a 5)? `));
+                if (nota < 1 || nota > 5 || isNaN(nota)) {
+                    console.log('Nota inválida. Por favor, digite um número entre 1 e 5.');
+                }
+            }
+
+            // 6. Salva a avaliação na reserva
+            reservaParaAvaliar.avaliacao = nota;
+
+            console.log('\nObrigado pela sua avaliação! Seu feedback é muito importante para nós.');
+
+        } else {
+            console.log('\nOpção inválida.');
         }
     }
 
@@ -350,7 +405,7 @@ class Sistema {
             const reservaParaMudar = this.reservas[indice];
 
             // ETAPA 4: Pedir o novo status.
-            const novoStatus = requisicao.question(`Qual o novo status para a reserva ${reservaParaMudar.id_reserva}? (Ex: Confirmada, Finalizada): `);
+            const novoStatus = requisicao.question(`Qual o novo status para a reserva ${reservaParaMudar.id_reserva}? (Ex: Confirmada, Finalizada, Cancelada): `);
 
             // ETAPA 5: Atualizar o status.
             reservaParaMudar.status = novoStatus;
@@ -361,8 +416,6 @@ class Sistema {
             console.log('\nOpção inválida. Por favor, tente novamente.');
         }
     }
-
-
 
 }
 
@@ -398,7 +451,7 @@ while (!sairDoPrograma) {
                 if (usuarioLogado instanceof Cliente) {
 
                     console.log(`Bem vindo(a), ${usuarioLogado.nome}!\n`);
-
+                    //Menu do cliente 
                     let sairDaAreaDoCliente = false;
                     while (!sairDaAreaDoCliente) {
                         console.log("=".repeat(12) + "Área do Cliente" + "=".repeat(12));
@@ -407,7 +460,8 @@ while (!sairDoPrograma) {
                         console.log("3: Fazer reserva")
                         console.log("4: Cancelar reserva");
                         console.log("5: Ver minhas reservas");
-                        console.log("6: Voltar ao Menu Pricipal");
+                        console.log("6: Avaliar estadia");
+                        console.log("7: Voltar ao Menu Pricipal");
                         const numeroÁreaCLiente = requisicao.question("Opcao escolhida: \n");
 
                         switch (numeroÁreaCLiente) {
@@ -437,6 +491,10 @@ while (!sairDoPrograma) {
                                 break
 
                             case "6":
+                                sistema.avaliarEstadia(usuarioLogado);
+                                break
+
+                            case "7":
                                 sairDaAreaDoCliente = true
                                 break;
 
@@ -482,6 +540,10 @@ while (!sairDoPrograma) {
                             case "5":
                                 sistema.mudarStatusReserva();
                                 break
+
+                            case "6":
+                                sistema.adicionarQuarto();
+                                break;
 
                             case "7":
                                 sairDaAreaDoFuncionário = true;

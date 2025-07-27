@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "nome": "Gabriel",
+    "cpf": null,
+    "email": "gabriel@gmail.com",
+    "senha": "senhadogabriel"
+  },
+  {
+    "id": 1,
+    "nome": "Joao Marcelo",
+    "cpf": null,
+    "email": "JM@gmail.com",
+    "senha": "senhadojm"
+  }
+]

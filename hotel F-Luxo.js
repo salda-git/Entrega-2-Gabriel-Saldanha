@@ -1,26 +1,28 @@
-var requisicao = require('readline-sync')
+const requisicao = require('readline-sync')
+const path = require('path');
+const fs = require('fs')
 //definir as características do login
-class Usuário {
-    constructor(cpf, email, senha) {
+
+class Usuario {
+    // A ordem oficial é definida aqui: id, nome, cpf, email, senha
+    constructor(id, nome, cpf, email, senha) {
+        this.id = id;
+        this.nome = nome;
         this.cpf = cpf;
         this.email = email;
         this.senha = senha;
     }
 }
 
-class Cliente extends Usuário {
-    constructor(id_cliente, cpf, email, senha) {
-        super(cpf, email, senha);
-        this.id_cliente = id_cliente
-        this.nome = nome;
+class Cliente extends Usuario {
+    constructor(id, nome, cpf, email, senha) {
+        super(id, nome, cpf, email, senha);
     }
 }
 
-class Funcionario extends Usuário {
-    constructor(id_funcionario, cpf, email, senha, nome) {
-        super(cpf, email, senha);
-        this.id_funcionario = id_funcionario
-        this.nome = nome;
+class Funcionario extends Usuario {
+    constructor(id, nome, cpf, email, senha) {
+        super(id, nome, cpf, email, senha);
     }
 }
 
@@ -34,8 +36,8 @@ class Quartos {
 }
 
 class Reserva {
-    constructor(id_reserva, id_cliente, tipoDeQuarto, checkin, checkout, status) {
-        this.id_cliente = id_cliente;
+    constructor(id_reserva, id, tipoDeQuarto, checkin, checkout, status) {
+        this.id = id;
         this.tipoDeQuarto = tipoDeQuarto;
         this.status = status;
         this.id_reserva = id_reserva;
@@ -52,46 +54,56 @@ class Sistema {
         this.clientes = [];
         this.funcionarios = [];
         this.quartos = [];
-        this.reservas = []
-        this.proximoID_cliente = 1;
-        this.proximoID_funcionario = 1;
-        this.proximoID_reserva = 1;
-        this.avaliacao = { nota: null, comentario: null }
+        this.reservas = [];
+
+        this.proximoIdCliente = 1;
+        this.proximoIdFuncionario = 1;
+        this.proximoIdReserva = 1;
+
+        this.diretorioDeDados = 'dados';
+
+        if (!fs.existsSync(this.diretorioDeDados)) {
+            fs.mkdirSync(this.diretorioDeDados);
+        }
+
+        this.carregarDados();
+
     }
-    //-----------funções pagina inicial----------------
-    cadastrarUsuario(nome, email, senha, cliente_ou_funcionario) {
-        //diferenciar cliente e funcionario por: cliente = 1, funcionario = 2
-        //FALTA LEVANTAR OS ERROS
 
-        if (cliente_ou_funcionario === "1") {
-            for (const i of this.clientes) {
-                if (i.email === email) {
-                    console.log("Cliente ja cadastrado")
-                    return null
-                }
+    //-----------funções pagina inicial ou gerais----------------
+    cadastrarUsuario() {
+        console.log("\n--- Novo Cadastro ---");
+        const tipoDeCadastro = requisicao.question("Qual o tipo do Cadastro?\n1: Cliente \n2: Funcionario\nResposta: ");
+        const nome = requisicao.question("Nome: ");
+        const email = requisicao.question("Email: ");
+        const senha = requisicao.question("Senha: ");
+
+        if (tipoDeCadastro === "1") {
+            if (this.clientes.find(c => c.email === email)) {
+                console.log("\nErro: E-mail de cliente já cadastrado.");
+                return;
             }
-            const novoCLiente = new Cliente(this.proximoID_cliente, nome, email, senha, cliente_ou_funcionario);
-            this.clientes.push(novoCLiente);
-            this.proximoID_cliente += 1;
-            console.log("Cadastro realizado com sucesso!")
+            // A chamada new Cliente() passa os valores na MESMA ORDEM: (id, nome, cpf, email, senha)
+            // Como não pedimos o CPF, passamos 'null'.
+            const novoCliente = new Cliente(this.proximoIdCliente, nome, null, email, senha);
+            this.clientes.push(novoCliente);
+            this.proximoIdCliente++;
+            console.log("\nCadastro de cliente realizado com sucesso!");
+            this.salvarClientes();
 
-            return novoCLiente;
-
-        } else if (cliente_ou_funcionario === "2") {
-            for (const i of this.funcionarios) {
-                if (i.email === email) {
-                    console.log("Funcionário ja cadastrado")
-                    return null
-                }
-
+        } else if (tipoDeCadastro === "2") {
+            if (this.funcionarios.find(f => f.email === email)) {
+                console.log("\nErro: E-mail de funcionário já cadastrado.");
+                return;
             }
-            const novoFuncionario = new Funcionario(this.proximoID_funcionario, nome, email, senha, cliente_ou_funcionario);
+            // A chamada new Funcionario() também passa os valores na MESMA ORDEM.
+            const novoFuncionario = new Funcionario(this.proximoIdFuncionario, nome, null, email, senha);
             this.funcionarios.push(novoFuncionario);
-            this.proximoID_funcionario += 1;
-            console.log("Cadastro realizado com sucesso!");
-
-            return novoFuncionario;
-
+            this.proximoIdFuncionario++;
+            console.log("\nCadastro de funcionário realizado com sucesso!");
+            this.salvarFuncionarios()
+        } else {
+            console.log("\nOpção de cadastro inválida.");
         }
     }
 
@@ -126,6 +138,53 @@ class Sistema {
             return null
         }
     }
+
+    mudarDados(usuarioLogado) {
+        let sair = false;
+        while (!sair) {
+            console.log('\n--- Meus Dados ---');
+            console.log(`Nome: ${usuarioLogado.nome}`);
+            console.log(`Email: ${usuarioLogado.email}`);
+            console.log('-'.repeat(20));
+            console.log('O que você deseja alterar?');
+            console.log('1: Mudar Nome');
+            console.log('2: Mudar Email');
+            console.log('3: Mudar Senha');
+            console.log('4: Voltar');
+
+            const escolha = requisicao.question('Opcao escolhida: ');
+
+            switch (escolha) {
+                case '1': {
+                    const novoNome = requisicao.question('Digite o novo nome: ');
+
+                    usuarioLogado.nome = novoNome;
+                    console.log('\nNome alterado com sucesso!');
+                    break;
+                }
+                case '2': {
+                    const novoEmail = requisicao.question('Digite o novo email: ');
+                    usuarioLogado.email = novoEmail;
+                    console.log('\nEmail alterado com sucesso!');
+                    break;
+                }
+                case '3': {
+                    const novaSenha = requisicao.question('Digite a nova senha: ');
+                    usuarioLogado.senha = novaSenha;
+                    console.log('\nSenha alterada com sucesso!');
+                    break;
+                }
+                case '4':
+                    sair = true;
+                    break;
+                default:
+                    console.log('\nOpção inválida.');
+                    break;
+            }
+            // Pausa para o usuário ver a mensagem de sucesso antes de mostrar o menu de novo
+            if (!sair) requisicao.question("\nPressione ENTER para continuar...");
+        }
+    }
     //---------------funções cliente----------------
 
     listarQuartosDetalhes() {
@@ -156,7 +215,7 @@ class Sistema {
         }
     }
 
-    fazerReserva(tipoDeQuarto, id_cliente, checkin, checkout) {
+    fazerReserva(tipoDeQuarto, id, checkin, checkout) {
         //encontrar o quarto
         let quartoEncontrado = null
         for (const i of this.quartos) {
@@ -168,7 +227,7 @@ class Sistema {
 
         //verificar se há disponibilidade e fazer reserva
         if (quartoEncontrado && quartoEncontrado.quantidade > 0) {
-            const novaReserva = new Reserva(this.proximoID_reserva, id_cliente, tipoDeQuarto, checkin, checkout, 'pendente')
+            const novaReserva = new Reserva(this.proximoID_reserva, id, tipoDeQuarto, checkin, checkout, 'pendente')
 
 
             this.reservas.push(novaReserva);
@@ -187,7 +246,7 @@ class Sistema {
         //filtrar as reservas desse cliente
         const reservasDoCliente = [];
         for (const reserva of this.reservas) {
-            if (reserva.id_cliente === usuarioLogado.id_cliente) {
+            if (reserva.id === usuarioLogado.id) {
                 reservasDoCliente.push(reserva)
             }
 
@@ -201,7 +260,7 @@ class Sistema {
         //listar as reservas da lista filtrada
         let x = 1;
         for (const reserva of reservasDoCliente) {
-            if (reserva.id_cliente == usuarioLogado.id_cliente) {
+            if (reserva.id == usuarioLogado.id) {
                 console.log(`Reserva número: ${reserva.id_reserva} | Quarto: ${reserva.tipoDeQuarto} | entrada: ${reserva.checkin} | saída: ${reserva.checkout} | status: ${reserva.status}`)
                 x += 1;
             }
@@ -253,7 +312,7 @@ class Sistema {
         //filtrar as reservas desse cliente
         const reservasDoCliente = [];
         for (const reserva of this.reservas) {
-            if (reserva.id_cliente === usuarioLogado.id_cliente) {
+            if (reserva.id === usuarioLogado.id) {
                 reservasDoCliente.push(reserva)
             }
 
@@ -280,7 +339,7 @@ class Sistema {
 
         // 1. Filtra apenas as reservas do cliente que estão "Finalizadas" e ainda não foram avaliadas
         const estadiasParaAvaliar = this.reservas.filter(reserva =>
-            reserva.id_cliente === usuarioLogado.id_cliente &&
+            reserva.id === usuarioLogado.id &&
             reserva.status === 'Finalizada' &&
             reserva.avaliacao === null
         );
@@ -337,12 +396,13 @@ class Sistema {
         const novoQuarto = new Quartos(tipoDeQuarto, camas, diaria, quantidade);
         this.quartos.push(novoQuarto);
         console.log(`${novoQuarto.tipoDeQuarto} adicionado com sucesso!`)
+        this.salvarQuartos();
         return novoQuarto;
     }
 
     listarQuartosReserva(usuarioLogado) {
         let x = 1
-        for (const quarto of sistema.quartos) {
+        for (const quarto of this.quartos) {
             console.log(`${x}: ${quarto.tipoDeQuarto}`)
             x += 1;
         }
@@ -363,7 +423,7 @@ class Sistema {
             console.log("Use o padrão XX/XX/XXXX")
             const checkin = requisicao.question("Checkin: ")
             const checkout = requisicao.question("Checkout: ")
-            this.fazerReserva(quartoSelecionado.tipoDeQuarto, usuarioLogado.id_cliente, checkin, checkout)
+            this.fazerReserva(quartoSelecionado.tipoDeQuarto, usuarioLogado.id, checkin, checkout)
 
         } else {
             console.log('Opção inválida')
@@ -380,7 +440,7 @@ class Sistema {
 
         let x = 1
         for (const reserva of this.reservas) {
-            console.log(`${x}: ${reserva.id_reserva} | ${reserva.id_cliente} | ${reserva.tipoDeQuarto} | ${reserva.checkin}| ${reserva.checkout}| ${reserva.status}`)
+            console.log(`${x}: ${reserva.id_reserva} | ${reserva.id} | ${reserva.tipoDeQuarto} | ${reserva.checkin}| ${reserva.checkout}| ${reserva.status}`)
             x += 1;
         }
         return true
@@ -389,7 +449,7 @@ class Sistema {
     listarClientes() {
         let x = 1
         for (const cliente of this.clientes) {
-            console.log(`${x}: ${cliente.id_cliente} | ${x}: ${cliente.nome} | ${x}: ${cliente.email} | `)
+            console.log(`${x}: ${cliente.id} | ${x}: ${cliente.nome} | ${x}: ${cliente.email} | `)
             x += 1;
         }
     }
@@ -449,7 +509,86 @@ class Sistema {
         console.log(`NOTA MÉDIA GERAL: ${media.toFixed(1)} de 5`);
         console.log('-'.repeat(30));
     }
+    //--------------funções para salvar os dados-------------
 
+    _salvarDados(nomeArquivo, dados) {
+        try {
+            const dadosEmString = JSON.stringify(dados, null, 2);
+            require('fs').writeFileSync(nomeArquivo, dadosEmString, 'utf-8');
+        } catch (erro) {
+            console.error(`Erro ao salvar o arquivo ${nomeArquivo}:`, erro);
+        }
+    }
+
+    salvarClientes() {
+        this._salvarDados('clientes.json', this.clientes);
+    }
+
+    salvarFuncionarios() {
+        this._salvarDados('funcionarios.json', this.funcionarios);
+    }
+
+    salvarReservas() {
+        const arrayDeReservas = Array.from(this.reservas.values());
+        this._salvarDados('reservas.json', arrayDeReservas);
+    }
+
+    salvarQuartos() {
+        this._salvarDados('quartos.json', this.quartos);
+    }
+
+    _carregarDados(nomeArquivo) {
+        try {
+            const fs = require('fs');
+            if (fs.existsSync(nomeArquivo)) {
+                const dadosEmString = fs.readFileSync(nomeArquivo, 'utf-8');
+                return JSON.parse(dadosEmString); // Retorna o array de objetos lido do arquivo
+            }
+            return []; // Se o arquivo não existe, retorna uma lista vazia
+        } catch (erro) {
+            console.error(`Erro ao carregar o arquivo ${nomeArquivo}:`, erro);
+            return []; // Em caso de erro, retorna uma lista vazia para não quebrar o programa
+        }
+    }
+
+    carregarDados() {
+        // --- Carregar Clientes ---
+        const clientesArray = this._carregarDados('clientes.json');
+        clientesArray.forEach(obj => {
+            // Recriamos a instância da classe Cliente
+            const cliente = new Cliente(obj.id, obj.nome, obj.cpf, obj.email, obj.senha);
+            this.clientes.push(cliente);
+            // Atualizamos o próximo ID para evitar colisões
+            if (obj.id >= this.proximoID_cliente) {
+                this.proximoID_cliente = obj.id + 1;
+            }
+        });
+
+        // --- Carregar Funcionários ---
+        const funcionariosArray = this._carregarDados('funcionarios.json');
+        funcionariosArray.forEach(obj => {
+            const funcionario = new Funcionario(obj.id, obj.nome, obj.cpf, obj.email, obj.senha);
+            this.funcionarios.push(funcionario);
+            if (obj.id >= this.proximoID_funcionario) {
+                this.proximoID_funcionario = obj.id + 1;
+            }
+        });
+
+        // --- Carregar Reservas ---
+        const reservasArray = this._carregarDados('reservas.json');
+        reservasArray.forEach(obj => {
+            // Recriamos a instância da classe Reserva
+            const reserva = new Reserva(obj.id_reserva, obj.id, obj.tipoDeQuarto, obj.checkin, obj.checkout, obj.status);
+            // Atribuímos a avaliação que pode ter sido salva
+            reserva.avaliacao = obj.avaliacao;
+            this.reservas.push(reserva); // Usaremos array para reservas para simplificar
+            if (obj.id_reserva >= this.proximoID_reserva) {
+                this.proximoID_reserva = obj.id_reserva + 1;
+            }
+        });
+
+        console.log('Dados carregados com sucesso!');
+    }
 }
 
 const sistema = new Sistema;
@@ -548,7 +687,7 @@ while (!sairDoPrograma) {
                         console.log("5: Mudar Status da Reserva");
                         console.log("6: Adicionar Quarto");
                         console.log("7: Ver avaliações")
-                        console.log("8: Sair da Área do funcionário")
+                        console.log("10: Sair da Área do funcionário")
                         const numeroÁreaFuncioario = requisicao.question("Opcao escolhida: ");
 
                         switch (numeroÁreaFuncioario) {
@@ -584,6 +723,10 @@ while (!sairDoPrograma) {
                                 break
 
                             case "8":
+                                sistema.mudarDados()
+                                break
+
+                            case "10":
                                 sairDaAreaDoFuncionário = true;
                                 break;
                         }
@@ -597,12 +740,7 @@ while (!sairDoPrograma) {
             break;
 
         case "2":
-            console.log("\n" + "=".repeat(40));
-            tipo_de_cadastro = requisicao.question("Qual o tipo do Cadastro?\n1: Cadastro de cliente \n2: Cadastro de funcionario\nResposta: ")
-            nome = requisicao.question("Nome: ")
-            email = requisicao.question("Email: ");
-            senha = requisicao.question("Senha: ");
-            sistema.cadastrarUsuario(nome, email, senha, tipo_de_cadastro);
+            sistema.cadastrarUsuario();
             break;
 
         case "3":

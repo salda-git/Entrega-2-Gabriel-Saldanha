@@ -1,43 +1,23 @@
 [
   {
-    "tipoDeQuarto": "Suite",
-    "status": "Cancelada",
+    "id_cliente": 2,
+    "tipoDeQuarto": "Suite Imperial",
+    "status": "Pendente",
     "id_reserva": 1,
-    "checkin": "23/07/2023",
-    "checkout": "28/07/2023",
+    "checkin": "28/07/2025",
+    "checkout": "30/07/2025",
     "avaliacao": {
       "nota": null,
       "comentario": null
     }
   },
   {
-    "tipoDeQuarto": "Suite Luxo",
-    "status": "Cance�ada",
+    "id_cliente": 2,
+    "tipoDeQuarto": "SSuite Fam�lia",
+    "status": "Pendente",
     "id_reserva": 2,
-    "checkin": "23/07/2025",
-    "checkout": "",
-    "avaliacao": {
-      "nota": null,
-      "comentario": null
-    }
-  },
-  {
-    "tipoDeQuarto": "Suite Luxo",
-    "status": "Pendente",
-    "id_reserva": 3,
-    "checkin": "23/07/2025",
-    "checkout": "22/07/2025",
-    "avaliacao": {
-      "nota": null,
-      "comentario": null
-    }
-  },
-  {
-    "tipoDeQuarto": "Suite Luxo",
-    "status": "Pendente",
-    "id_reserva": 4,
-    "checkin": "23/07/2025",
-    "checkout": "25/07/2025",
+    "checkin": "28/07/2025",
+    "checkout": "30/07/2025",
     "avaliacao": {
       "nota": null,
       "comentario": null

@@ -3,13 +3,26 @@
     "tipoDeQuarto": "Suite Luxo",
     "camas": 2,
     "preco": 500,
-    "quantidade": 3,
-    "descricao": "Desfrute de vistas panor�micas para o mar a partir da sua varanda privativa. Esta su�te espa�osa conta com uma cama king-size com len��is de algod�o eg�pcio, banheiro em m�rmore com banheira de imers�o e amenidades exclusivas. O ref�gio perfeito para uma estadia inesquec�vel."
+    "quantidade": 3
   },
   {
     "tipoDeQuarto": "Quarto Fam�lia",
     "camas": 4,
     "preco": 300,
     "quantidade": 5
+  },
+  {
+    "tipoDeQuarto": "Suite Imperial",
+    "camas": 1,
+    "preco": 750,
+    "quantidade": 3,
+    "descricao": "Um santu�rio de luxo e tranquilidade, nossa Su�te Imperial foi projetada para oferecer uma experi�ncia de conforto inigual�vel. O ambiente principal disp�e de 60m� com decora��o contempor�nea, uma cama king-size com menu de travesseiros, e uma espa�osa varanda mobiliada com uma vista deslumbrante da cidade."
+  },
+  {
+    "tipoDeQuarto": "SSuite Fam�lia",
+    "camas": 3,
+    "preco": 300,
+    "quantidade": 1,
+    "descricao": "Quarto confortavel dois quartos separados com 1 cama de casa e 2 de solteiro"
   }
 ]

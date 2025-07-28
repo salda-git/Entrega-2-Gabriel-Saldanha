@@ -160,12 +160,16 @@ class Sistema {
             console.log('\n--- Meus Dados ---');
             console.log(`Nome: ${usuarioLogado.nome}`);
             console.log(`Email: ${usuarioLogado.email}`);
+            console.log(`CPF: ${usuarioLogado.cpf}`);
+            console.log(`Data de nascimento: ${usuarioLogado.dataNascimento}`);
             console.log('-'.repeat(20));
             console.log('O que você deseja alterar?');
             console.log('1: Mudar Nome');
             console.log('2: Mudar Email');
             console.log('3: Mudar Senha');
-            console.log('4: Voltar');
+            console.log(`4: Mudar CPF `)
+            console.log(`5: Mudar data de nascimento`)
+            console.log('6: Voltar');
 
             const escolha = requisicao.question('Opcao escolhida: ');
             console.clear()
@@ -190,14 +194,25 @@ class Sistema {
                     console.log('\nSenha alterada com sucesso!');
                     break;
                 }
-                case '4':
+                case '4': {
+                    const novoCpf = requisicao.question('Digite o novo CPF: ');
+                    usuarioLogado.cpf = novoCpf;
+                    console.log('\nCPF alterado com sucesso!');
+                    break;
+                }
+                case '5': {
+                    const novaData = requisicao.question('Digite a nova data de nascimento: ');
+                    usuarioLogado.dataNascimento = novaData;
+                    console.log('\nData de nascimento alterada com sucesso!');
+                    break;
+                }
+                case '6':
                     sair = true;
                     break;
                 default:
                     console.log('\nOpção inválida.');
                     break;
             }
-            // Pausa para o usuário ver a mensagem de sucesso antes de mostrar o menu de novo
             if (!sair) requisicao.question("\nPressione ENTER para continuar...");
             console.clear()
         }
@@ -241,56 +256,56 @@ class Sistema {
     }
 
     fazerReserva(tipoDeQuarto, id_cliente, checkin, checkout) {
-        console.clear()
-
         const tipoDeQuartoInfo = this.quartos.find(q => q.tipoDeQuarto === tipoDeQuarto);
-
         if (!tipoDeQuartoInfo) {
             console.log(`\nErro: O tipo de quarto '${tipoDeQuarto}' não existe.`);
-            return null;
+            return;
         }
 
         const dataCheckinDesejada = this._converterData(checkin);
         const dataCheckoutDesejada = this._converterData(checkout);
 
-        // Verificar se há conflito de datas
+        if (!dataCheckinDesejada || !dataCheckoutDesejada) {
+            console.log('\nErro: Formato de data inválido. Use DD/MM/AAAA.');
+            return;
+        }
 
+        if (dataCheckinDesejada >= dataCheckoutDesejada) {
+            console.log('\nErro: A data de check-out deve ser posterior à data de check-in.');
+            return;
+        }
+
+        // Filtra para encontrar as reservas ATIVAS que conflitam com o período desejado
         const reservasConflitantes = this.reservas.filter(reserva => {
-            // Ignoramos reservas que já foram canceladas
-            if (reserva.tipoDeQuarto !== tipoDeQuarto || reserva.status === 'Cancelada') {
+            // Ignora reservas que são de outro tipo de quarto
+            if (reserva.tipoDeQuarto !== tipoDeQuarto) {
+                return false;
+            }
+
+            // CORREÇÃO: Ignora reservas que NÃO estão ativas (Cancelada ou Finalizada)
+            const statusAtivo = reserva.status.toLowerCase() === 'pendente' || reserva.status.toLowerCase() === 'confirmada';
+            if (!statusAtivo) {
                 return false;
             }
 
             const dataCheckinExistente = this._converterData(reserva.checkin);
             const dataCheckoutExistente = this._converterData(reserva.checkout);
 
-            // A lógica de conflito: uma reserva conflita se o período desejado
-
+            // A fórmula para verificar sobreposição de datas está correta.
             return dataCheckinDesejada < dataCheckoutExistente && dataCheckoutDesejada > dataCheckinExistente;
         });
 
-        //  Verificar a disponibilidade
+        // A verificação de disponibilidade está correta.
         if (reservasConflitantes.length >= tipoDeQuartoInfo.quantidade) {
             console.log(`\nDesculpe, não há quartos do tipo '${tipoDeQuarto}' disponíveis para o período de ${checkin} a ${checkout}.`);
-            return null;
+            return;
         }
 
-        const novaReserva = new Reserva(
-            this.proximoIdReserva,
-            id_cliente,
-            tipoDeQuarto,
-            checkin,
-            checkout,
-            'Pendente'
-        );
-
+        const novaReserva = new Reserva(this.proximoIdReserva, id_cliente, tipoDeQuarto, checkin, checkout, 'Pendente');
         this.reservas.push(novaReserva);
         this.proximoIdReserva++;
-
         console.log(`\nReserva para o quarto '${tipoDeQuarto}' de ${checkin} a ${checkout} realizada com sucesso!`);
-
         this.salvarReservas();
-
         return novaReserva;
     }
 
@@ -553,7 +568,7 @@ class Sistema {
 
         let x = 1
         for (const reserva of this.reservas) {
-            console.log(`${x}: ${reserva.id_reserva} | ${reserva.id} | ${reserva.tipoDeQuarto} | ${reserva.checkin}| ${reserva.checkout}| ${reserva.status}`)
+            console.log(`ID da reserva: ${reserva.id_reserva} |ID do cliente: ${reserva.id_cliente} | ${reserva.tipoDeQuarto} | Checkin: ${reserva.checkin} | Checkout: ${reserva.checkout}| Status: ${reserva.status}`)
             x += 1;
         }
         requisicao.question("Pressione ENTER para continuar")
@@ -565,9 +580,10 @@ class Sistema {
         console.clear()
         let x = 1
         for (const cliente of this.clientes) {
-            console.log(`${x}: ${cliente.id} | ${x}: ${cliente.nome} | ${x}: ${cliente.email} | `)
+            console.log(`ID: ${cliente.id} | Nome: ${cliente.nome} | Email: ${cliente.email} | CPF: ${cliente.cpf} `)
             x += 1;
         }
+        requisicao.question("Pressione ENTER para continuar")
         console.clear()
     }
 
@@ -580,7 +596,7 @@ class Sistema {
             return;
         }
 
-        const escolhaReserva = requisicao.question('\nDigite o numero da reserva que deseja alterar: ');
+        const escolhaReserva = requisicao.question('\nDigite o ID da reserva que deseja alterar: ');
         const indice = parseInt(escolhaReserva) - 1;
         console.clear()
 
@@ -889,10 +905,20 @@ class Sistema {
 
     //---------funções auxiliares----------
     _converterData(stringData) {
-        const [dia, mes, ano] = stringData.split('/');
-        return new Date(ano, mes - 1, dia);
-    }
+        if (!stringData || typeof stringData !== 'string') return null;
+        const partes = stringData.split('/');
+        if (partes.length !== 3) return null;
 
+        const [dia, mes, ano] = partes.map(Number);
+        if (isNaN(dia) || isNaN(mes) || isNaN(ano)) return null;
+
+        const data = new Date(ano, mes - 1, dia);
+        // Validação extra para datas inválidas como 31/02
+        if (data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia) {
+            return data;
+        }
+        return null;
+    }
 
 }
 const sistema = new Sistema;
@@ -987,8 +1013,10 @@ while (!sairDoPrograma) {
                             case "1":
                                 console.clear();
                                 console.log("\n" + "=".repeat(40));
-                                console.log(`${usuarioLogado.nome}`);
-                                console.log(`${usuarioLogado.email}`);
+                                console.log(`Nome: ${usuarioLogado.nome}`);
+                                console.log(`E-mail: ${usuarioLogado.email}`);
+                                console.log(`CPF: ${usuarioLogado.cpf}`);
+                                console.log(`Data de nascimento: ${usuarioLogado.dataNascimento}`);
                                 requisicao.question("Pressione ENTER para continuar: ")
                                 break;
 

@@ -15,14 +15,19 @@
     "tipoDeQuarto": "Suite Imperial",
     "camas": 1,
     "preco": 750,
-    "quantidade": 3,
-    "descricao": "Um santu�rio de luxo e tranquilidade, nossa Su�te Imperial foi projetada para oferecer uma experi�ncia de conforto inigual�vel. O ambiente principal disp�e de 60m� com decora��o contempor�nea, uma cama king-size com menu de travesseiros, e uma espa�osa varanda mobiliada com uma vista deslumbrante da cidade."
+    "quantidade": 3
   },
   {
-    "tipoDeQuarto": "SSuite Fam�lia",
+    "tipoDeQuarto": "Suite Fam�lia",
     "camas": 3,
     "preco": 300,
-    "quantidade": 1,
-    "descricao": "Quarto confortavel dois quartos separados com 1 cama de casa e 2 de solteiro"
+    "quantidade": 1
+  },
+  {
+    "tipoDeQuarto": "Suite Noite Estrelada",
+    "camas": 1,
+    "preco": 300,
+    "quantidade": 4,
+    "descricao": "Durma sob um c�u estrelado nesta su�te exclusiva com teto de vidro panor�mico. Uma combina��o perfeita de design moderno, conforto e uma vista de tirar o f�lego, ideal para quem busca uma experi�ncia verdadeiramente celestial"
   }
 ]

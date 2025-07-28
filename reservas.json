@@ -1,11 +1,23 @@
 [
   {
     "id_cliente": 2,
-    "tipoDeQuarto": "Suite Imperial",
+    "tipoDeQuarto": "Suite Luxo",
     "status": "Pendente",
     "id_reserva": 1,
     "checkin": "28/07/2025",
-    "checkout": "30/07/2025",
+    "checkout": "29/07/2025",
+    "avaliacao": {
+      "nota": null,
+      "comentario": null
+    }
+  },
+  {
+    "id_cliente": 4,
+    "tipoDeQuarto": "Suite Noite Estrelada",
+    "status": "Confirmada",
+    "id_reserva": 2,
+    "checkin": "31/07/2025",
+    "checkout": "04/08/2025",
     "avaliacao": {
       "nota": null,
       "comentario": null
@@ -13,14 +25,14 @@
   },
   {
     "id_cliente": 2,
-    "tipoDeQuarto": "SSuite Fam�lia",
-    "status": "Pendente",
-    "id_reserva": 2,
-    "checkin": "28/07/2025",
-    "checkout": "30/07/2025",
+    "tipoDeQuarto": "Quarto Fam�lia",
+    "status": "Finalizada",
+    "id_reserva": 3,
+    "checkin": "20/07/2025",
+    "checkout": "23/07/2025",
     "avaliacao": {
-      "nota": null,
-      "comentario": null
+      "nota": 5,
+      "comentario": "Quarto lindo e atendimento excelente!"
     }
   }
 ]

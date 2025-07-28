@@ -362,7 +362,7 @@ class Sistema {
         //filtrar as reservas desse cliente
         const reservasDoCliente = [];
         for (const reserva of this.reservas) {
-            if (reserva.id === usuarioLogado.id) {
+            if (reserva.id_cliente === usuarioLogado.id) {
                 reservasDoCliente.push(reserva)
             }
 
@@ -383,14 +383,13 @@ class Sistema {
         }
     }
 
-
     avaliarEstadia(usuarioLogado) {
         console.clear()
         console.log('\n--- Avaliar Estadia ---');
 
         // 1. Filtra apenas as reservas do cliente que estão "Finalizadas" e ainda não foram avaliadas
         const estadiasParaAvaliar = this.reservas.filter(reserva =>
-            reserva.id === usuarioLogado.id &&
+            reserva.id_cliente === usuarioLogado.id &&
             reserva.status === 'Finalizada' &&
             reserva.avaliacao.nota === null
         );
@@ -435,8 +434,10 @@ class Sistema {
             reservaParaAvaliar.avaliacao.nota = nota;
             reservaParaAvaliar.avaliacao.comentario = comentario;
 
+            this.salvarReservas();
             console.log('\nObrigado pela sua avaliação! Seu feedback é muito importante para nós.');
-
+            requisicao.question("Pressione ENTER para continuar");
+            console.clear()
         } else {
             console.log('\nOpção inválida.');
         }
@@ -569,8 +570,6 @@ class Sistema {
             console.log(`ID da reserva: ${reserva.id_reserva} |ID do cliente: ${reserva.id_cliente} | ${reserva.tipoDeQuarto} | Checkin: ${reserva.checkin} | Checkout: ${reserva.checkout}| Status: ${reserva.status}`)
             x += 1;
         }
-        requisicao.question("Pressione ENTER para continuar")
-        console.clear()
         return true
     }
 
@@ -586,32 +585,64 @@ class Sistema {
     }
 
     mudarStatusReserva() {
-        console.clear()
+        console.clear();
         console.log('\n--- Alterar Status da Reserva ---');
-        const haReservas = this.listarReservas();
 
+        const haReservas = this.listarReservas();
         if (!haReservas) {
             return;
         }
 
-        const escolhaReserva = requisicao.question('\nDigite o ID da reserva que deseja alterar: ');
+        const escolhaReserva = requisicao.question('\nDigite o numero da reserva que deseja alterar: ');
         const indice = parseInt(escolhaReserva) - 1;
-        console.clear()
+        console.clear();
 
-        // ETAPA 3: Validar a escolha do funcionário.
+
         if (indice >= 0 && indice < this.reservas.length) {
             const reservaParaMudar = this.reservas[indice];
 
-            // ETAPA 4: Pedir o novo status.
-            const novoStatus = requisicao.question(`Qual o novo status para a reserva ${reservaParaMudar.id_reserva}? (Ex: Confirmada, Finalizada, Cancelada): `);
-            console.clear()
-            // ETAPA 5: Atualizar o status.
-            reservaParaMudar.status = novoStatus;
+            console.log(`Alterando status da Reserva ID: ${reservaParaMudar.id_reserva}`);
+            console.log(`Status Atual: ${reservaParaMudar.status}`);
 
-            console.log(`\nStatus da reserva ${reservaParaMudar.id_reserva} alterado para '${novoStatus}' com sucesso!`);
-            requisicao.question("Pressione ENTER para continuar");
-            console.clear()
-            this.salvarReservas();
+            const promptStatus = `Qual o novo status?\n1: Pendente\n2: Confirmada\n3: Finalizada\n4: Cancelada\nResposta: `;
+
+            const escolhaStatus = this._pedirOpcaoValida(promptStatus, ['1', '2', '3', '4']);
+
+            let novoStatus = '';
+            let operacaoValida = true;
+
+
+            switch (escolhaStatus) {
+                case '1':
+                    novoStatus = 'Pendente';
+                    break;
+                case '2':
+                    novoStatus = 'Confirmada';
+                    break;
+                case '3':
+
+                    const hoje = new Date();
+                    hoje.setHours(0, 0, 0, 0);
+                    const dataCheckout = this._converterData(reservaParaMudar.checkout);
+
+                    if (dataCheckout > hoje) {
+                        console.log('\nERRO: Uma reserva não pode ser marcada como "Finalizada" antes da sua data de check-out.');
+                        operacaoValida = false;
+                    } else {
+                        novoStatus = 'Finalizada';
+                    }
+                    break;
+                case '4':
+                    novoStatus = 'Cancelada';
+                    break;
+            }
+
+            if (operacaoValida) {
+                reservaParaMudar.status = novoStatus;
+                console.log(`\nStatus da reserva ${reservaParaMudar.id_reserva} alterado para '${novoStatus}' com sucesso!`);
+                this.salvarReservas();
+            }
+
         } else {
             console.log('\nOpção inválida. Por favor, tente novamente.');
         }
@@ -644,7 +675,7 @@ class Sistema {
         console.log('\n' + '-'.repeat(30));
         console.log(`NOTA MÉDIA GERAL: ${media.toFixed(1)} de 5`);
         console.log('-'.repeat(30));
-        requisicao.require("Pressione ENTER para continuar")
+        requisicao.question("Pressione ENTER para continuar")
     }
 
     editarQuarto() {
@@ -876,7 +907,7 @@ class Sistema {
         const reservasArray = this._carregarDados('reservas.json');
 
         reservasArray.forEach(obj => {
-            const reserva = new Reserva(obj.id_reserva, obj.id, obj.tipoDeQuarto, obj.checkin, obj.checkout, obj.status);
+            const reserva = new Reserva(obj.id_reserva, obj.id_cliente, obj.tipoDeQuarto, obj.checkin, obj.checkout, obj.status);
 
             if (obj.avaliacao) {
                 reserva.avaliacao = obj.avaliacao;

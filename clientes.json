@@ -12,5 +12,13 @@
     "cpf": null,
     "email": "marcia@gmail.com",
     "senha": "senhadamarcia"
+  },
+  {
+    "id": 3,
+    "nome": "Leonardo Saldanha",
+    "cpf": "12358662635",
+    "email": "leonardo@gmail.com",
+    "senha": "senhadoleonardo",
+    "dataNascimento": "03/03/2006"
   }
 ]

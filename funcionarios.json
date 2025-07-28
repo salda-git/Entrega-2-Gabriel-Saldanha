@@ -5,5 +5,12 @@
     "cpf": null,
     "email": "jp@gmail.com",
     "senha": "senhadojp"
+  },
+  {
+    "id": 2,
+    "nome": "Carlos",
+    "cpf": null,
+    "email": "carlos@gmail.com",
+    "senha": "senhadocarlos"
   }
 ]

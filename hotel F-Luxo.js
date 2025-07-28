@@ -79,16 +79,17 @@ class Sistema {
         const nome = requisicao.question("Nome: ");
         const email = requisicao.question("Email: ");
         const senha = requisicao.question("Senha: ");
+        const cpf = requisicao.question("CPF: ");
+        const nascimento = requisicao.question("Data de nascimento: DD/MM/AAAA: ");
 
         if (tipoDeCadastro === "1") {
-            console.log('DEBUG: Verificando a lista de clientes:', this.clientes);
             if (this.clientes.find(c => c.email === email)) {
                 console.log("\nErro: E-mail de cliente já cadastrado.");
                 return;
             }
             // A chamada new Cliente() passa os valores na MESMA ORDEM: (id, nome, cpf, email, senha)
             // Como não pedimos o CPF, passamos 'null'.
-            const novoCliente = new Cliente(this.proximoIdCliente, nome, null, email, senha);
+            const novoCliente = new Cliente(this.proximoIdCliente, nome, cpf, email, senha, nascimento);
             this.clientes.push(novoCliente);
             this.proximoIdCliente += 1;
             console.log("\nCadastro de cliente realizado com sucesso!");
@@ -100,7 +101,7 @@ class Sistema {
                 return;
             }
             // A chamada new Funcionario() também passa os valores na MESMA ORDEM.
-            const novoFuncionario = new Funcionario(this.proximoIdFuncionario, nome, null, email, senha);
+            const novoFuncionario = new Funcionario(this.proximoIdFuncionario, nome, cpf, email, senha, nascimento);
             this.funcionarios.push(novoFuncionario);
             this.proximoIdFuncionario += 1;
             console.log("\nCadastro de funcionário realizado com sucesso!");

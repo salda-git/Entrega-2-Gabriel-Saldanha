@@ -76,43 +76,41 @@ class Sistema {
     //-----------funções pagina inicial ou gerais----------------
     cadastrarUsuario() {
         console.log("\n--- Novo Cadastro ---");
-        const tipoDeCadastro = requisicao.question("Qual o tipo do Cadastro?\n1: Cliente \n2: Funcionario\nResposta: ");
+
+        const promptTipo = "Qual o tipo do Cadastro?\n1: Cliente \n2: Funcionario\nResposta: ";
+        const tipoDeCadastro = this._pedirOpcaoValida(promptTipo, ['1', '2']);
+
         const nome = requisicao.question("Nome: ");
-        const email = requisicao.question("Email: ");
+        const cpf = requisicao.question("CPF (apenas numeros): ");
+        const dataNascimento = requisicao.question("Data de Nascimento (DD/MM/AAAA): ");
+
+        const email = this._pedirEmailValido();
+
         const senha = requisicao.question("Senha: ");
-        const cpf = requisicao.question("CPF: ");
-        const nascimento = requisicao.question("Data de nascimento: DD/MM/AAAA: ");
 
         if (tipoDeCadastro === "1") {
-            if (this.clientes.find(c => c.email === email)) {
-                console.log("\nErro: E-mail de cliente já cadastrado.");
+            if (this.clientes.find(c => c.email === email || c.cpf === cpf)) {
+                console.log("\nErro: E-mail ou CPF de cliente já cadastrado.");
                 return;
             }
-            // A chamada new Cliente() passa os valores na MESMA ORDEM: (id, nome, cpf, email, senha)
-            // Como não pedimos o CPF, passamos 'null'.
-            const novoCliente = new Cliente(this.proximoIdCliente, nome, cpf, email, senha, nascimento);
+            const novoCliente = new Cliente(this.proximoIdCliente, nome, cpf, email, senha, dataNascimento);
             this.clientes.push(novoCliente);
-            this.proximoIdCliente += 1;
+            this.proximoIdCliente++;
             console.log("\nCadastro de cliente realizado com sucesso!");
             this.salvarClientes();
 
         } else if (tipoDeCadastro === "2") {
-            if (this.funcionarios.find(f => f.email === email)) {
-                console.log("\nErro: E-mail de funcionário já cadastrado.");
+            if (this.funcionarios.find(f => f.email === email || f.cpf === cpf)) {
+                console.log("\nErro: E-mail ou CPF de funcionário já cadastrado.");
                 return;
             }
-            // A chamada new Funcionario() também passa os valores na MESMA ORDEM.
-            const novoFuncionario = new Funcionario(this.proximoIdFuncionario, nome, cpf, email, senha, nascimento);
+            const novoFuncionario = new Funcionario(this.proximoIdFuncionario, nome, cpf, email, senha, dataNascimento);
             this.funcionarios.push(novoFuncionario);
-            this.proximoIdFuncionario += 1;
+            this.proximoIdFuncionario++;
             console.log("\nCadastro de funcionário realizado com sucesso!");
-            requisicao.question("Pressione ENTER para continuar");
-            this.salvarFuncionarios()
-        } else {
-            console.log("\nOpção de cadastro inválida.");
+            this.salvarFuncionarios();
         }
-        requisicao.question("Pressione ENTER para continuar")
-        console.clear()
+
     }
 
     fazerLogin(email, senha) {
@@ -183,7 +181,7 @@ class Sistema {
                     break;
                 }
                 case '2': {
-                    const novoEmail = requisicao.question('Digite o novo email: ');
+                    const novoEmail = this._pedirEmailValido();
                     usuarioLogado.email = novoEmail;
                     console.log('\nEmail alterado com sucesso!');
                     break;
@@ -195,7 +193,7 @@ class Sistema {
                     break;
                 }
                 case '4': {
-                    const novoCpf = requisicao.question('Digite o novo CPF: ');
+                    const novoCpf = this._pedirCpfValido();
                     usuarioLogado.cpf = novoCpf;
                     console.log('\nCPF alterado com sucesso!');
                     break;
@@ -920,6 +918,75 @@ class Sistema {
         return null;
     }
 
+    _pedirOpcaoValida(textoDoPrompt, opcoesValidas) {
+        while (true) {
+            const escolha = requisicao.question(textoDoPrompt);
+            if (opcoesValidas.includes(escolha)) {
+                return escolha; // Retorna a escolha se ela estiver na lista de opções válidas
+            }
+            console.log(`Opção inválida. Por favor, escolha uma das seguintes opções: ${opcoesValidas.join(', ')}`);
+        }
+    }
+
+    _pedirEmailValido() {
+        while (true) {
+            const email = requisicao.question('Email: ');
+            // Expressão regular simples que verifica o formato "algo@algo.algo"
+            const regex = /^\S+@\S+\.\S+$/;
+            if (regex.test(email)) {
+                return email; // Retorna o e-mail se o formato for válido
+            }
+            console.log('Formato de e-mail inválido. Tente novamente (ex: nome@dominio.com).');
+        }
+    }
+
+    _pedirCpfValido() {
+        while (true) {
+            let cpf = requisicao.question('CPF (apenas numeros): ');
+            // Remove todos os caracteres que não são números (pontos, traços, etc.)
+            cpf = cpf.replace(/[^\d]/g, '');
+
+            // 1. Verifica se o CPF tem 11 dígitos e se não são todos números repetidos
+            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+                console.log('CPF inválido. Deve conter 11 dígitos e não podem ser todos iguais. Tente novamente.');
+                continue;
+            }
+
+            // 2. Lógica para calcular os dígitos verificadores
+            let soma = 0;
+            let resto;
+
+            // Cálculo do primeiro dígito verificador
+            for (let i = 1; i <= 9; i++) {
+                soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+            }
+            resto = (soma * 10) % 11;
+            if ((resto === 10) || (resto === 11)) {
+                resto = 0;
+            }
+            if (resto !== parseInt(cpf.substring(9, 10))) {
+                console.log('CPF inválido. Tente novamente.');
+                continue;
+            }
+
+            // Cálculo do segundo dígito verificador
+            soma = 0;
+            for (let i = 1; i <= 10; i++) {
+                soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+            }
+            resto = (soma * 10) % 11;
+            if ((resto === 10) || (resto === 11)) {
+                resto = 0;
+            }
+            if (resto !== parseInt(cpf.substring(10, 11))) {
+                console.log('CPF inválido. Tente novamente.');
+                continue;
+            }
+
+            // Se passou em todas as verificações, o CPF é válido.
+            return cpf;
+        }
+    }
 }
 const sistema = new Sistema;
 

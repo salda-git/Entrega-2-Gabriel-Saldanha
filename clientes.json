@@ -25,7 +25,14 @@
     "nome": "Luiza Melo",
     "cpf": "13232120722",
     "email": "luiza@gmail.com",
-    "senha": "senhadaluiza",
-    "dataNascimento": "03/09/2004"
+    "senha": "senhadaluiza"
+  },
+  {
+    "id": 5,
+    "nome": "Miguel",
+    "cpf": "1957655535",
+    "email": "miguel@poli.ufrj.br",
+    "senha": "senhadomiguel",
+    "dataNascimento": "02/08/2002"
   }
 ]

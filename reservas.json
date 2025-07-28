@@ -2,10 +2,13 @@
   {
     "id": 1,
     "tipoDeQuarto": "Suite",
-    "status": "Pendente",
+    "status": "Finalizada",
     "id_reserva": 1,
     "checkin": "23/07/2023",
     "checkout": "28/07/2023",
-    "avaliacao": null
+    "avaliacao": {
+      "nota": null,
+      "comentario": null
+    }
   }
 ]

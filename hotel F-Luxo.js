@@ -44,7 +44,7 @@ class Reserva {
         this.id_reserva = id_reserva;
         this.checkin = checkin;
         this.checkout = checkout;
-        this.avaliacao = null;
+        this.avaliacao = { nota: null, comentario: null };
     }
 }
 
@@ -80,6 +80,7 @@ class Sistema {
         const senha = requisicao.question("Senha: ");
 
         if (tipoDeCadastro === "1") {
+            console.log('DEBUG: Verificando a lista de clientes:', this.clientes);
             if (this.clientes.find(c => c.email === email)) {
                 console.log("\nErro: E-mail de cliente já cadastrado.");
                 return;
@@ -351,7 +352,7 @@ class Sistema {
         const estadiasParaAvaliar = this.reservas.filter(reserva =>
             reserva.id === usuarioLogado.id &&
             reserva.status === 'Finalizada' &&
-            reserva.avaliacao === null
+            reserva.avaliacao.nota === null
         );
 
         // 2. Verifica se existem estadias elegíveis para avaliação
@@ -505,7 +506,7 @@ class Sistema {
             reservaParaMudar.status = novoStatus;
 
             console.log(`\nStatus da reserva ${reservaParaMudar.id_reserva} alterado para '${novoStatus}' com sucesso!`);
-
+            this.salvarReservas();
         } else {
             console.log('\nOpção inválida. Por favor, tente novamente.');
         }
@@ -605,12 +606,17 @@ class Sistema {
 
         // --- Carregar Reservas ---
         const reservasArray = this._carregarDados('reservas.json');
+
         reservasArray.forEach(obj => {
-            // Recriamos a instância da classe Reserva
             const reserva = new Reserva(obj.id_reserva, obj.id, obj.tipoDeQuarto, obj.checkin, obj.checkout, obj.status);
-            // Atribuímos a avaliação que pode ter sido salva
-            reserva.avaliacao = obj.avaliacao;
-            this.reservas.push(reserva); // Usaremos array para reservas para simplificar
+
+            if (obj.avaliacao) {
+                reserva.avaliacao = obj.avaliacao;
+            }
+
+            this.reservas.push(reserva);
+
+            // Atualizamos o próximo ID para evitar colisões
             if (obj.id_reserva >= this.proximoID_reserva) {
                 this.proximoID_reserva = obj.id_reserva + 1;
             }

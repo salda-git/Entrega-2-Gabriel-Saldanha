@@ -18,7 +18,14 @@
     "nome": "Leonardo Saldanha",
     "cpf": "12358662635",
     "email": "leonardo@gmail.com",
-    "senha": "senhadoleonardo",
-    "dataNascimento": "03/03/2006"
+    "senha": "senhadoleonardo"
+  },
+  {
+    "id": 4,
+    "nome": "Luiza Melo",
+    "cpf": "13232120722",
+    "email": "luiza@gmail.com",
+    "senha": "senhadaluiza",
+    "dataNascimento": "03/09/2004"
   }
 ]

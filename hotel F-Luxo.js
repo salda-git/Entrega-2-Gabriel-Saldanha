@@ -29,11 +29,12 @@ class Funcionario extends Usuario {
 }
 
 class Quartos {
-    constructor(tipoDeQuarto, camas, preco, quantidade) {
+    constructor(tipoDeQuarto, camas, preco, quantidade, descricao) {
         this.tipoDeQuarto = tipoDeQuarto;
         this.camas = camas;
         this.preco = preco;
         this.quantidade = quantidade;
+        this.descricao = descricao;
     }
 }
 
@@ -228,7 +229,13 @@ class Sistema {
             console.log(`Camas: ${quartoSelecionado.camas}`);
             console.log(`Diária: ${quartoSelecionado.preco}`);
             console.log(`Disponibilidade: ${quartoSelecionado.quantidade}`);
+            console.log(`Descrição: ${quartoSelecionado.descricao}`);
+
+            requisicao.question("Pressione ENTER para continuar: ");
+            console.clear()
         } else {
+            requisicao.question("Pressione ENTER para continuar: ");
+            console.clear()
             console.log('Opção inválida')
         }
     }
@@ -431,6 +438,8 @@ class Sistema {
         const camas = requisicao.question('Quantidade de camas: ');
         const preco = requisicao.question('Preco da diaria (ex: 150.50): ');
         const quantidade = requisicao.question('Quantidade de quartos deste tipo: ');
+        const descricao = requisicao.question('Descrição: ');
+
 
         const camasNum = parseInt(camas);
         const precoNum = parseFloat(preco);
@@ -438,7 +447,7 @@ class Sistema {
 
         if (tipoDeQuarto && !isNaN(camasNum) && !isNaN(precoNum) && !isNaN(quantidadeNum)) {
 
-            const novoQuarto = new Quartos(tipoDeQuarto, camasNum, precoNum, quantidadeNum);
+            const novoQuarto = new Quartos(tipoDeQuarto, camasNum, precoNum, quantidadeNum, descricao);
             this.quartos.push(novoQuarto);
             console.log(`\nQuarto '${novoQuarto.tipoDeQuarto}' adicionado com sucesso!`);
             console.clear()
@@ -661,15 +670,18 @@ class Sistema {
                 console.log(`Camas: ${quartoParaEditar.camas}`);
                 console.log(`Preço: R$ ${quartoParaEditar.preco.toFixed(2)}`);
                 console.log(`Quantidade Total: ${quartoParaEditar.quantidade}`);
+                console.log(`Descrição Atual: ${quartoParaEditar.descricao}`);
                 console.log('-'.repeat(25));
                 console.log('O que você deseja alterar?');
                 console.log('1: Alterar Tipo');
                 console.log('2: Alterar Número de Camas');
                 console.log('3: Alterar Preço da Diária');
                 console.log('4: Alterar Quantidade Total');
-                console.log('5: Salvar e Voltar');
+                console.log('5: Alterar a descrição');
+                console.log('6: Salvar e Voltar');
 
                 const escolhaEdicao = requisicao.question('Opcao escolhida: ');
+                console.clear();
 
                 switch (escolhaEdicao) {
                     case '1':
@@ -681,7 +693,7 @@ class Sistema {
                         const novasCamas = parseInt(requisicao.question('Digite o novo número de camas: '));
                         if (!isNaN(novasCamas) && novasCamas > 0) {
                             quartoParaEditar.camas = novasCamas;
-                            console.log('Número de camas alterado!');
+                            console.log('Número de camas alterado!'); requisicao.question("\nPressione ENTER para continuar...");
                         } else {
                             console.log('Valor inválido.');
                         }
@@ -690,7 +702,7 @@ class Sistema {
                         const novoPreco = parseFloat(requisicao.question('Digite o novo preço da diária: '));
                         if (!isNaN(novoPreco) && novoPreco >= 0) {
                             quartoParaEditar.preco = novoPreco;
-                            console.log('Preço alterado!');
+                            console.log('Preço alterado!'); requisicao.question("\nPressione ENTER para continuar...");
                         } else {
                             console.log('Valor inválido.');
                         }
@@ -701,10 +713,16 @@ class Sistema {
                             quartoParaEditar.quantidade = novaQuantidade;
                             console.log('Quantidade alterada!');
                         } else {
-                            console.log('Valor inválido.');
+                            console.log('Valor inválido.'); requisicao.question("\nPressione ENTER para continuar...");
                         }
                         break;
                     case '5':
+                        const novaDescrição = requisicao.question("Digite a nova descrição: ");
+                        quartoParaEditar.descricao = novaDescrição;
+                        console.log("Descrição alterada com sucesso!")
+                        requisicao.question("\nPressione ENTER para continuar...");
+
+                    case '6':
                         this.salvarQuartos();
                         console.log('\nAlterações salvas com sucesso!');
                         sairDoMenuEdicao = true;
@@ -925,8 +943,10 @@ while (!sairDoPrograma) {
                             case "1":
                                 console.clear();
                                 console.log("\n" + "=".repeat(40));
-                                console.log(`${usuarioLogado.nome}`);
-                                console.log(`${usuarioLogado.email}`);
+                                console.log(`Nome: ${usuarioLogado.nome}`);
+                                console.log(`E-mail: ${usuarioLogado.email}`);
+                                console.log(`CPF: ${usuarioLogado.cpf}`);
+                                console.log(`Data de nascimento: ${usuarioLogado.dataNascimento}`);
                                 requisicao.question("Pressione ENTER para continuar: ")
                                 break;
 

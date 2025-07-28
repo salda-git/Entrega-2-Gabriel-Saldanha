@@ -3,7 +3,8 @@
     "tipoDeQuarto": "Suite Luxo",
     "camas": 2,
     "preco": 500,
-    "quantidade": 3
+    "quantidade": 3,
+    "descricao": "Desfrute de vistas panor�micas para o mar a partir da sua varanda privativa. Esta su�te espa�osa conta com uma cama king-size com len��is de algod�o eg�pcio, banheiro em m�rmore com banheira de imers�o e amenidades exclusivas. O ref�gio perfeito para uma estadia inesquec�vel."
   },
   {
     "tipoDeQuarto": "Quarto Fam�lia",

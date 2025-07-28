@@ -1,11 +1,33 @@
 [
   {
-    "id": 1,
     "tipoDeQuarto": "Suite",
     "status": "Finalizada",
     "id_reserva": 1,
     "checkin": "23/07/2023",
     "checkout": "28/07/2023",
+    "avaliacao": {
+      "nota": null,
+      "comentario": null
+    }
+  },
+  {
+    "tipoDeQuarto": "Suite Luxo",
+    "status": "Pendente",
+    "id_reserva": 2,
+    "checkin": "23/07/2025",
+    "checkout": "",
+    "avaliacao": {
+      "nota": null,
+      "comentario": null
+    }
+  },
+  {
+    "id_cliente": 2,
+    "tipoDeQuarto": "Suite Luxo",
+    "status": "Pendente",
+    "id_reserva": 3,
+    "checkin": "23/07/2025",
+    "checkout": "22/07/2025",
     "avaliacao": {
       "nota": null,
       "comentario": null

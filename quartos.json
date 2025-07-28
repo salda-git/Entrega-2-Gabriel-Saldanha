@@ -1,8 +1,8 @@
 [
   {
-    "tipoDeQuarto": "Quarto Fam�lia",
-    "camas": 4,
-    "preço": 300,
-    "quantidade": 8
+    "tipoDeQuarto": "Suite Luxo",
+    "camas": 2,
+    "preço": 550,
+    "quantidade": 5
   }
 ]

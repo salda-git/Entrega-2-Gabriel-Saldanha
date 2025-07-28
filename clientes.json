@@ -5,5 +5,12 @@
     "cpf": null,
     "email": "gabrielp.saldanha@gmail.com",
     "senha": "senhadogabriel"
+  },
+  {
+    "id": 2,
+    "nome": "Marcia",
+    "cpf": null,
+    "email": "marcia@gmail.com",
+    "senha": "senhadamarcia"
   }
 ]

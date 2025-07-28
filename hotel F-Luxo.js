@@ -37,8 +37,8 @@ class Quartos {
 }
 
 class Reserva {
-    constructor(id_reserva, id, tipoDeQuarto, checkin, checkout, status) {
-        this.id = id;
+    constructor(id_reserva, id_cliente, tipoDeQuarto, checkin, checkout, status) {
+        this.id_cliente = id_cliente;
         this.tipoDeQuarto = tipoDeQuarto;
         this.status = status;
         this.id_reserva = id_reserva;
@@ -89,7 +89,7 @@ class Sistema {
             // Como não pedimos o CPF, passamos 'null'.
             const novoCliente = new Cliente(this.proximoIdCliente, nome, null, email, senha);
             this.clientes.push(novoCliente);
-            this.proximoIdCliente++;
+            this.proximoIdCliente += 1;
             console.log("\nCadastro de cliente realizado com sucesso!");
             this.salvarClientes();
 
@@ -101,8 +101,9 @@ class Sistema {
             // A chamada new Funcionario() também passa os valores na MESMA ORDEM.
             const novoFuncionario = new Funcionario(this.proximoIdFuncionario, nome, null, email, senha);
             this.funcionarios.push(novoFuncionario);
-            this.proximoIdFuncionario++;
+            this.proximoIdFuncionario += 1;
             console.log("\nCadastro de funcionário realizado com sucesso!");
+            requisicao.question("Pressione ENTER para continuar");
             this.salvarFuncionarios()
         } else {
             console.log("\nOpção de cadastro inválida.");
@@ -431,32 +432,81 @@ class Sistema {
     }
 
     listarQuartosReserva(usuarioLogado) {
-        let x = 1
+        let x = 1;
         for (const quarto of this.quartos) {
-            console.log(`${x}: ${quarto.tipoDeQuarto}`)
+            console.log(`${x}: ${quarto.tipoDeQuarto}`);
             x += 1;
         }
-        let voltar = x
-        console.log(`${voltar}: voltar para Àrea do Cliente`);
-        const numeroListaQuartos = requisicao.question("Qual quarto deseja reservar?: ")
+
+        let voltar = x;
+        console.log(`${voltar}: voltar para Área do Cliente`);
+        const numeroListaQuartos = requisicao.question("Qual quarto deseja reservar?: ");
         const valor = parseInt(numeroListaQuartos);
 
         if (valor == voltar) {
-            return
+            return;
         }
 
         if (valor > 0 && valor < voltar) {
             const indiceQuarto = valor - 1;
             const quartoSelecionado = this.quartos[indiceQuarto];
 
-            console.log(`Qual a data de entrada e saída?`);
-            console.log("Use o padrão XX/XX/XXXX")
-            const checkin = requisicao.question("Checkin: ")
-            const checkout = requisicao.question("Checkout: ")
-            this.fazerReserva(quartoSelecionado.tipoDeQuarto, usuarioLogado.id, checkin, checkout)
+            console.log('Qual a data de entrada e saída?');
+            console.log("Use o padrão DD/MM/AAAA");
+
+            // INÍCIO DA VALIDAÇÃO DE CHECK-IN
+            let checkin;
+            while (true) {
+                const inputData = requisicao.question("Checkin (DD/MM/AAAA): ");
+                const regex = /^\d{2}\/\d{2}\/\d{4}$/; // Verifica o formato
+
+                if (!regex.test(inputData)) {
+                    console.log("Formato inválido. Por favor, use DD/MM/AAAA.");
+                    continue;
+                }
+
+                const [dia, mes, ano] = inputData.split('/').map(Number);
+                const data = new Date(ano, mes - 1, dia);
+
+                // Verifica se a data é real (ex: 30/02 não é válido)
+                if (data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia) {
+                    checkin = inputData; // Guarda a data válida
+                    break; // Sai do loop
+                } else {
+                    console.log("Data inválida. O dia ou mês não existe.");
+                }
+            }
+            // FIM DA VALIDAÇÃO DE CHECK-IN
+
+
+            // INÍCIO DA VALIDAÇÃO DE CHECK-OUT
+            let checkout;
+            while (true) {
+                const inputData = requisicao.question("Checkout (DD/MM/AAAA): ");
+                const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+
+                if (!regex.test(inputData)) {
+                    console.log("Formato inválido. Por favor, use DD/MM/AAAA.");
+                    continue;
+                }
+
+                const [dia, mes, ano] = inputData.split('/').map(Number);
+                const data = new Date(ano, mes - 1, dia);
+
+                if (data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia) {
+                    checkout = inputData; // Guarda a data válida
+                    break; // Sai do loop
+                } else {
+                    console.log("Data inválida. O dia ou mês não existe.");
+                }
+            }
+            // FIM DA VALIDAÇÃO DE CHECK-OUT
+
+            // Chama a função de reserva com as datas já validadas
+            this.fazerReserva(quartoSelecionado.tipoDeQuarto, usuarioLogado.id, checkin, checkout);
 
         } else {
-            console.log('Opção inválida')
+            console.log('Opção inválida');
         }
     }
 
@@ -589,8 +639,8 @@ class Sistema {
             const cliente = new Cliente(obj.id, obj.nome, obj.cpf, obj.email, obj.senha);
             this.clientes.push(cliente);
             // Atualizamos o próximo ID para evitar colisões
-            if (obj.id >= this.proximoID_cliente) {
-                this.proximoID_cliente = obj.id + 1;
+            if (obj.id >= this.proximoIdCliente) {
+                this.proximoIdCliente = obj.id + 1;
             }
         });
 
@@ -599,8 +649,8 @@ class Sistema {
         funcionariosArray.forEach(obj => {
             const funcionario = new Funcionario(obj.id, obj.nome, obj.cpf, obj.email, obj.senha);
             this.funcionarios.push(funcionario);
-            if (obj.id >= this.proximoID_funcionario) {
-                this.proximoID_funcionario = obj.id + 1;
+            if (obj.id >= this.proximoIdFuncionario) {
+                this.proximoIdFuncionario = obj.id + 1;
             }
         });
 
@@ -617,9 +667,17 @@ class Sistema {
             this.reservas.push(reserva);
 
             // Atualizamos o próximo ID para evitar colisões
-            if (obj.id_reserva >= this.proximoID_reserva) {
-                this.proximoID_reserva = obj.id_reserva + 1;
+            if (obj.id_reserva >= this.proximoIdReserva) {
+                this.proximoIdReserva = obj.id_reserva + 1;
             }
+        });
+
+        // --- Carregar Quartos ---
+        const quartosArray = this._carregarDados('quartos.json');
+        quartosArray.forEach(obj => {
+            // Lembre-se de usar 'preco' sem acento se você já padronizou na classe Quartos
+            const quarto = new Quartos(obj.tipoDeQuarto, obj.camas, obj.preco, obj.quantidade);
+            this.quartos.push(quarto);
         });
 
         console.log('Dados carregados com sucesso!');
